@@ -1,0 +1,14 @@
+main: com.alexlabbane.underwaterbedwars.UnderwaterBedwars
+api: spigot
+name: UnderwaterBedwars
+version: '1.0'
+api-version: 1.16
+author: Alex Labbane
+
+commands:
+  toggle:
+    description: Toggle effects
+  testshop:
+    description: Test the shop, duh
+  bwteam:
+    description: Operations on teams
