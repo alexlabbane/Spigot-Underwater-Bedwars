@@ -1,9 +1,19 @@
 package com.alexlabbane.underwaterbedwars;
 
+import java.util.ArrayList;
+
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
+import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
+import com.mojang.datafixers.util.Pair;
 
 /**
  * Class to wrap Player objects with additional bedwars game state information
@@ -58,6 +68,63 @@ public class BedwarsPlayer {
 	 */
 	public void setArmor(BedwarsArmor newArmor) {
 		this.armor = newArmor;
+	}
+	
+	/**
+	 * Set the players armor to whatever armor they have bought
+	 * Adds enchantments based on team upgrades
+	 */
+	public void setPlayerArmor() {
+		PlayerInventory inv = player.getInventory();
+
+		ArrayList<ItemStack> finishedArmor = new ArrayList<ItemStack>();
+		for(Pair<Material, LeveledEnchantment[]> armor : team.getStarterArmor()) {
+			ItemStack armorPiece = new ItemStack(armor.getFirst());
+			if(armor.getSecond() != null)
+				for(LeveledEnchantment le : armor.getSecond())
+					armorPiece.addEnchantment(le.getEnchantment(), le.getLevel());
+			
+			finishedArmor.add(armorPiece);
+		}
+		
+		// Add purchased armor upgrades and enchantments
+		switch(this.armor) {
+		case CHAIN:
+			finishedArmor.set(0, new ItemStack(Material.CHAINMAIL_BOOTS));
+			finishedArmor.set(1, new ItemStack(Material.CHAINMAIL_LEGGINGS));
+			break;
+		case IRON:
+			finishedArmor.set(0, new ItemStack(Material.IRON_BOOTS));
+			finishedArmor.set(1, new ItemStack(Material.IRON_LEGGINGS));
+			break;
+		case DIAMOND:
+			finishedArmor.set(0, new ItemStack(Material.DIAMOND_BOOTS));
+			finishedArmor.set(1, new ItemStack(Material.DIAMOND_LEGGINGS));
+			break;
+		}
+		
+		// Add protection
+		int protLevel = this.team.getProtLevel();
+		if(protLevel > 0 && protLevel <= 4) {
+			finishedArmor.get(0).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protLevel);
+			finishedArmor.get(1).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protLevel);
+			finishedArmor.get(2).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protLevel);
+		}
+		
+		inv.setBoots(finishedArmor.get(0));
+		inv.setLeggings(finishedArmor.get(1));
+		inv.setChestplate(finishedArmor.get(2));
+		inv.setHelmet(finishedArmor.get(3));
+		
+		// Dye to match color
+		for(ItemStack armor : inv.getArmorContents()) {
+			ItemMeta meta = armor.getItemMeta();
+			if(meta instanceof LeatherArmorMeta) {
+				((LeatherArmorMeta) meta).setColor(this.getTeam().getColor().RGB());
+			}
+			
+			armor.setItemMeta(meta);
+		}
 	}
 	
 	/**

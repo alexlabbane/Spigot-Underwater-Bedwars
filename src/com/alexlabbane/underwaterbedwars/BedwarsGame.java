@@ -63,6 +63,23 @@ public class BedwarsGame {
 		}
 	}
 	
+	/**
+	 * Get instance of BedwarsPlayer associated with a specific player
+	 * Returns null if no such BedwarsPlayer exists
+	 * @param p (the player)
+	 * @return BedwarsPlayer of param p
+	 */
+	public BedwarsPlayer getBedwarsPlayer(Player p) {
+		for(BedwarsTeam team : this.teams) { 
+			for(BedwarsPlayer bwPlayer : team.getBedwarsPlayers()) {
+				if(bwPlayer.getPlayer() == p)
+					return bwPlayer;
+			}
+		}
+		
+		return null;
+	}
+	
 	public static BedwarsGame getGame(int gameID) {
 		for(BedwarsGame game: activeGames) {
 			if(game.gameID == gameID)

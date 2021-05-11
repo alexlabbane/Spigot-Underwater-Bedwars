@@ -33,20 +33,29 @@ import net.md_5.bungee.api.ChatColor;
 
 public class BedwarsTeam implements Listener {
 	private Plugin plugin;
+	private BedwarsGame game;
 	private TeamColor teamColor;
-	private ArrayList<Player> players;
+	private ArrayList<BedwarsPlayer> bwPlayers;
 	private ArrayList<Pair<Material, LeveledEnchantment[]>> starterMaterials;
 	private ArrayList<Pair<Material, LeveledEnchantment[]>> starterArmor;
+	
+	// Team upgrades (TODO: add the rest)
+	private boolean sharpness;
+	private int protLevel;
 	
 	// Shop stuff
 	private ItemShop itemShop;
 	private Location itemShopLocation;
 	private Entity itemShopVillager;
 	
-	public BedwarsTeam(ArrayList<Player> players, String color, Plugin p, BedwarsGame game) {
+	public BedwarsTeam(ArrayList<BedwarsPlayer> players, String color, Plugin p, BedwarsGame game) {
 		this.plugin = p;
 		this.teamColor = TeamColor.valueOf(color.toUpperCase());
-		this.players = players;
+		this.bwPlayers = players;
+		this.game = game;
+		
+		this.sharpness = false;
+		this.protLevel = 1; // DEBUG: Default protection to level 1
 		
 		this.itemShop = new ItemShop(color, game);
 		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
@@ -61,7 +70,11 @@ public class BedwarsTeam implements Listener {
 	public BedwarsTeam(String color, Plugin p, BedwarsGame game) {
 		this.plugin = p;
 		this.teamColor = TeamColor.valueOf(color.toUpperCase());
-		this.players = new ArrayList<Player>();
+		this.bwPlayers = new ArrayList<BedwarsPlayer>();
+		this.game = game;
+		
+		this.sharpness = false;
+		this.protLevel = 1; // DEBUG: Default protection to level 1
 		
 		this.itemShop = new ItemShop(color, game);
 		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
@@ -73,8 +86,25 @@ public class BedwarsTeam implements Listener {
 		this.initializeStarterArmor();
 	}
 	
-	public ArrayList<Player> getPlayers() { return this.players; }
+	public ArrayList<BedwarsPlayer> getBedwarsPlayers() { return this.bwPlayers; }
+	public ArrayList<Player> getPlayers() {
+		ArrayList<Player> players = new ArrayList<Player>();
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			players.add(bwPlayer.getPlayer());
+		
+		return players;
+	}
+	
 	public TeamColor getColor() { return this.teamColor; }
+	
+	public void setSharpness(boolean b) { this.sharpness = b; }
+	public boolean hasSharpness() { return this.sharpness; }
+	
+	public void setProtectionLevel(int level) { this.protLevel = level; }
+	public int getProtLevel() { return this.protLevel; }
+	
+	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterMaterials() { return this.starterMaterials; }
+	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() {return this.starterArmor; }
 	
 	public void initializeStarterMaterials() {
 		this.starterMaterials.add(new Pair<Material, LeveledEnchantment[]>(Material.TRIDENT, new LeveledEnchantment[]{ new LeveledEnchantment(Enchantment.LOYALTY, 1) })); // trident always at index 0
@@ -87,6 +117,7 @@ public class BedwarsTeam implements Listener {
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_HELMET, new LeveledEnchantment[] { new LeveledEnchantment(Enchantment.WATER_WORKER, 1)} )); // helmet always index 3
 	}
 	
+	// TODO: Perform this in BedwarsPlayer class
 	public void setPlayerArmor(Player player) {
 		PlayerInventory inv = player.getInventory();
 
@@ -116,6 +147,7 @@ public class BedwarsTeam implements Listener {
 		}
 	}
 	
+	// TODO: Perform this in BedwarsPlayer class
 	public void setPlayerStarterMaterials(Player player) {
 		PlayerInventory inv = player.getInventory();
 		
@@ -130,20 +162,30 @@ public class BedwarsTeam implements Listener {
 	}
 	
 	public void addPlayer(Player player) {
-		if(!players.contains(player))
-			players.add(player);
+		BedwarsPlayer newBedwarsPlayer = new BedwarsPlayer(player);
 		
+		if(!this.getPlayers().contains(player))
+			bwPlayers.add(newBedwarsPlayer);
+		
+		newBedwarsPlayer.setTeam(this);
 		player.getInventory().clear();
 		this.setPlayerArmor(player);
 		this.setPlayerStarterMaterials(player);
 	}
 	
 	public boolean hasPlayer(Player player) {
-		return this.players.contains(player);
+		return this.getPlayers().contains(player);
 	}
 	
 	public void removePlayer(Player player) {
-		this.players.remove(player);
+		for(int i = 0; i < this.bwPlayers.size(); i++) {
+			BedwarsPlayer bwPlayer = this.bwPlayers.get(i);
+			if(bwPlayer.getPlayer() == player) {
+				this.bwPlayers.remove(i);
+				bwPlayer.setTeam(null);
+				i--;
+			}
+		}
 	}
 	
 	@EventHandler
@@ -177,8 +219,9 @@ public class BedwarsTeam implements Listener {
 				public void run() {
 					// TODO: Send to teams respawn location
 					p.setGameMode(GameMode.SURVIVAL);
-					setPlayerArmor(p);
-					setPlayerStarterMaterials(p);
+					game.getBedwarsPlayer(p).setPlayerArmor();
+					// setPlayerArmor(p); // DEPRECATED
+					setPlayerStarterMaterials(p); // DEPRECATED
 				}
 			}.runTaskLater(this.plugin, 20 * 5);			
 		}
