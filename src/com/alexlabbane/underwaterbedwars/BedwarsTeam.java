@@ -55,7 +55,7 @@ public class BedwarsTeam implements Listener {
 		this.game = game;
 		
 		this.sharpness = false;
-		this.protLevel = 1; // DEBUG: Default protection to level 1
+		this.protLevel = 0;
 		
 		this.itemShop = new ItemShop(color, game);
 		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
@@ -74,10 +74,12 @@ public class BedwarsTeam implements Listener {
 		this.game = game;
 		
 		this.sharpness = false;
-		this.protLevel = 1; // DEBUG: Default protection to level 1
+		this.protLevel = 0;
 		
 		this.itemShop = new ItemShop(color, game);
 		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
+		
+		// DEBUG
 		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
 		
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
@@ -104,7 +106,7 @@ public class BedwarsTeam implements Listener {
 	public int getProtLevel() { return this.protLevel; }
 	
 	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterMaterials() { return this.starterMaterials; }
-	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() {return this.starterArmor; }
+	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() { return this.starterArmor; }
 	
 	public void initializeStarterMaterials() {
 		this.starterMaterials.add(new Pair<Material, LeveledEnchantment[]>(Material.TRIDENT, new LeveledEnchantment[]{ new LeveledEnchantment(Enchantment.LOYALTY, 1) })); // trident always at index 0
@@ -115,36 +117,6 @@ public class BedwarsTeam implements Listener {
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_LEGGINGS, null)); // leggings always index 1
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_CHESTPLATE, null)); // chestplate always index 2
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_HELMET, new LeveledEnchantment[] { new LeveledEnchantment(Enchantment.WATER_WORKER, 1)} )); // helmet always index 3
-	}
-	
-	// TODO: Perform this in BedwarsPlayer class
-	public void setPlayerArmor(Player player) {
-		PlayerInventory inv = player.getInventory();
-
-		ArrayList<ItemStack> finishedArmor = new ArrayList<ItemStack>();
-		for(Pair<Material, LeveledEnchantment[]> armor : this.starterArmor) {
-			ItemStack armorPiece = new ItemStack(armor.getFirst());
-			if(armor.getSecond() != null)
-				for(LeveledEnchantment le : armor.getSecond())
-					armorPiece.addEnchantment(le.getEnchantment(), le.getLevel());
-			
-			finishedArmor.add(armorPiece);
-		}
-		
-		inv.setBoots(finishedArmor.get(0));
-		inv.setLeggings(finishedArmor.get(1));
-		inv.setChestplate(finishedArmor.get(2));
-		inv.setHelmet(finishedArmor.get(3));
-		
-		// Dye to match color
-		for(ItemStack armor : inv.getArmorContents()) {
-			ItemMeta meta = armor.getItemMeta();
-			if(meta instanceof LeatherArmorMeta) {
-				((LeatherArmorMeta) meta).setColor(this.getColor().RGB());
-			}
-			
-			armor.setItemMeta(meta);
-		}
 	}
 	
 	// TODO: Perform this in BedwarsPlayer class
@@ -169,7 +141,7 @@ public class BedwarsTeam implements Listener {
 		
 		newBedwarsPlayer.setTeam(this);
 		player.getInventory().clear();
-		this.setPlayerArmor(player);
+		this.game.getBedwarsPlayer(player).setPlayerArmor();
 		this.setPlayerStarterMaterials(player);
 	}
 	
@@ -220,7 +192,6 @@ public class BedwarsTeam implements Listener {
 					// TODO: Send to teams respawn location
 					p.setGameMode(GameMode.SURVIVAL);
 					game.getBedwarsPlayer(p).setPlayerArmor();
-					// setPlayerArmor(p); // DEPRECATED
 					setPlayerStarterMaterials(p); // DEPRECATED
 				}
 			}.runTaskLater(this.plugin, 20 * 5);			
