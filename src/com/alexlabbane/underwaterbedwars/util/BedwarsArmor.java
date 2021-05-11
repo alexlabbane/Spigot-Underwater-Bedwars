@@ -1,5 +1,10 @@
 package com.alexlabbane.underwaterbedwars.util;
 
+/**
+ * Enum to define current armor level of a Bedwars Player
+ * @author scien
+ *
+ */
 public enum BedwarsArmor {
 	LEATHER (0),
 	CHAIN (1),
