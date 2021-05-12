@@ -26,10 +26,18 @@ public abstract class Shop implements Listener {
 	public Shop(int shopSize, BedwarsGame game) {
 		this.bedwarsGame = game;
 		this.inv = Bukkit.createInventory(null, shopSize, "Item Shop");
+    	Bukkit.getServer().getPluginManager().registerEvents(this, this.bedwarsGame.getPlugin());
+	}
+	
+	public Shop(int shopSize, BedwarsGame game, String shopTitle) {
+		this.bedwarsGame = game;
+		this.inv = Bukkit.createInventory(null, shopSize, shopTitle);
+    	Bukkit.getServer().getPluginManager().registerEvents(this, this.bedwarsGame.getPlugin());
 	}
 	
 	public abstract void initializeItems();
 	public abstract void handleTransaction(Player player, String shopCostString);
+	public abstract void handleLink(Player player, String shopLinkString);
 	
 	/**
 	 * Create an item to place in the shop
@@ -101,12 +109,36 @@ public abstract class Shop implements Listener {
 		// String that stores purchase information for the item
 		String shopCostString = matName + "," + amount + "," + payMatName + "," + payAmount + "," + enchantments.length;
 		for(LeveledEnchantment le : enchantments) {
-			item.addEnchantment(le.getEnchantment(), le.getLevel());
+			item.addUnsafeEnchantment(le.getEnchantment(), le.getLevel());
 			shopCostString += "," + le.getEnchantment().getName() + "," + le.getLevel();
 		}
 		
 		Bukkit.getServer().getLogger().log(Level.WARNING, shopCostString);
 		Util.addNBTTagString(item, "ShopCost", shopCostString); // Add string of meta info to the item
+		
+		return item;
+	}
+	
+	/**
+	 * Creates a link to another shop
+	 * When this item is clicked on, it should open a new shop GUI for the linked shop
+	 * Shop to link to denoted by shopName
+	 * @param matName
+	 * @param amount
+	 * @param name the display name of the link
+	 * @param shopName
+	 * @param color
+	 * @return the item to show in the shop
+	 */
+	protected ItemStack createShopLink(final String matName, int amount, final String name,  final String shopName, final String color) {
+		final ItemStack item = new ItemStack(Material.getMaterial(matName));
+		final ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(name);
+		item.setItemMeta(meta);
+		
+		// String that stores link information for the item
+		String shopLinkString = matName + "," + amount + "," + name + "," + shopName + "," + color;
+		Util.addNBTTagString(item, "ShopLink", shopLinkString);
 		
 		return item;
 	}
@@ -131,13 +163,13 @@ public abstract class Shop implements Listener {
 			e.setCancelled(true);
 			
 			String shopCostString = Util.getNBTTagString(item, "ShopCost");
-			if(!shopCostString.equals("") && this.bedwarsGame.hasTeam(player)) {
+			if(shopCostString != null && !shopCostString.equals("") && this.bedwarsGame.hasTeam(player)) {
 				this.handleTransaction(player, shopCostString);
 			}
 			
 			String shopLinkString = Util.getNBTTagString(item, "ShopLink");
-			if(!shopLinkString.equals("") && this.bedwarsGame.hasTeam(player)) {
-				// Handle a link to a different shop GUI
+			if(shopLinkString != null && !shopLinkString.equals("") && this.bedwarsGame.hasTeam(player)) {
+				this.handleLink(player, shopLinkString);
 			}
 		}
 		

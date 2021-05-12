@@ -29,6 +29,7 @@ public class BedwarsGame {
 		this.teams = new ArrayList<BedwarsTeam>();
 	}
 	
+	public Plugin getPlugin() { return this.plugin; }
 	public ArrayList<BedwarsTeam> getTeams() { return this.teams; }
 	
 	public void addTeam(TeamColor color) {
