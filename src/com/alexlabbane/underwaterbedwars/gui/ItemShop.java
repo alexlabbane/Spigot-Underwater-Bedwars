@@ -9,10 +9,13 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.BedwarsPlayer;
 import com.alexlabbane.underwaterbedwars.shoputil.ShopItem;
+import com.alexlabbane.underwaterbedwars.shoputil.ShopPotion;
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
@@ -87,8 +90,13 @@ public class ItemShop extends Shop implements Listener {
 				break;
 			}
 		}
-		
+
+		this.inv.setItem(28, this.createShopItem("OAK_PLANKS", 16, "Buy Wood (4 gold)", 4, "GOLD_INGOT"));
+		this.inv.setItem(29, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident III (7 gold)", 7, "GOLD_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 3)}));
 		this.inv.setItem(30, this.createSpecialShopItem("SPECIAL_IRON_BOOTS", 1, "Buy Iron Armor (12 gold)", 12, "GOLD_INGOT")); // TODO: Add rest of items (iron armor, tools, etc)
+		this.inv.setItem(31, this.createSpecialShopItem("SPECIAL_SHEARS", 1, "Buy Shears (20 iron)", 20, "IRON_INGOT"));
+		this.inv.setItem(32, this.createShopItem("ARROW", 8, "Buy Arrows (2 gold)", 2, "GOLD_INGOT"));
+		this.inv.setItem(33, this.createPotionShopItem("SPEED", 1, 20 * 45, "Buy Speed Potion (1 emerald)", 1, "EMERALD"));
 	}
 	
 	@Override
@@ -131,6 +139,9 @@ public class ItemShop extends Shop implements Listener {
 				if(shopItem.getMatName().startsWith("SPECIAL_")) {
 					// Handle special drops
 					handleSpecialTransaction(player, shopCostString);
+				} else if(shopItem.getMatName().startsWith("POTION_")) {
+					// Handle potion drops
+					handlePotionTransaction(player, shopCostString);
 				} else {
 					// Handle normal drops
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
@@ -157,6 +168,37 @@ public class ItemShop extends Shop implements Listener {
 		// Refresh the shop
 		this.initializeItems(player);
 		player.updateInventory();
+	}
+	
+	/**
+	 * Handles potion transactions
+	 * Assumes player can already afford item
+	 * Applies potion effect and uses ShopPotion class instead of ShopItem
+	 * to parse shopCostString
+	 * @param player
+	 * @param shopCostString
+	 */
+	private void handlePotionTransaction(Player player, String shopCostString) {
+		ShopPotion shopPotion = new ShopPotion(shopCostString);
+		player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+		shopPotion.playerPay(player);
+		
+		ItemStack item = new ItemStack(shopPotion.getMat(), shopPotion.getAmount());
+		PotionMeta meta = (PotionMeta) item.getItemMeta();
+		meta.addCustomEffect(
+				new PotionEffect(
+						shopPotion.getPotionEffect(), 
+						shopPotion.getPotionEffectDuration(), 
+						shopPotion.getPotionEffectLevel()),
+				true);
+		meta.setDisplayName(shopPotion.toString());
+		item.setItemMeta(meta);
+		
+		HashMap<Integer, ItemStack> notAdded = player.getInventory().addItem(item);
+		
+		if(!notAdded.isEmpty())
+			notAdded.values().forEach(itemStack -> player.getWorld().dropItemNaturally(player.getLocation(), itemStack));
+		player.sendMessage(ChatColor.GREEN + "You bought " + shopPotion.getAmount() + "x " + shopPotion.getMatName() + " for " + ChatColor.YELLOW + shopPotion.getPayAmount() + "x " + shopPotion.getPayMatName() + ".");
 	}
 	
 	/**

@@ -14,6 +14,9 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
@@ -86,6 +89,22 @@ public abstract class Shop implements Listener {
 		
 		// String that stores purchase information for the item
 		String shopCostString = matName + "," + amount + "," + payMatName + "," + payAmount + ",0"; // ",0 at end is for 0 enchantments
+		
+		Bukkit.getServer().getLogger().log(Level.WARNING, shopCostString);
+		Util.addNBTTagString(item, "ShopCost", shopCostString); // Add string of meta info to the item
+
+		return item;
+	}
+	
+	protected ItemStack createPotionShopItem(final String potionEffectName, int level, int durationTicks, final String name, int payAmount, final String payMatName) { 
+		final ItemStack item = new ItemStack(Material.POTION);
+		final ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(name);
+		((PotionMeta)meta).addCustomEffect(new PotionEffect(PotionEffectType.getByName(potionEffectName), durationTicks, level), true);
+		item.setItemMeta(meta);
+		
+		// ",0," used to make sure ShopItem class knows there are no enchants
+		String shopCostString = "POTION_" + potionEffectName + "," + 1 + "," + payMatName + "," + payAmount + ",0," + level + "," + durationTicks;
 		
 		Bukkit.getServer().getLogger().log(Level.WARNING, shopCostString);
 		Util.addNBTTagString(item, "ShopCost", shopCostString); // Add string of meta info to the item

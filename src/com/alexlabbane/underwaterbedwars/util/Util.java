@@ -6,6 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffectType;
 
 public class Util {
 	static Plugin plugin;
@@ -88,4 +89,16 @@ public class Util {
 		
 	}
 	
+	public static String getCommonPotionName(PotionEffectType pet) {
+		switch(pet.getName()) {
+		case "SPEED":
+			return "Speed";
+		case "INVISIBILITY":
+			return "Invisibility";
+		case "JUMP":
+			return "Jump";
+		}
+		
+		return "Undefined";
+	}
 }

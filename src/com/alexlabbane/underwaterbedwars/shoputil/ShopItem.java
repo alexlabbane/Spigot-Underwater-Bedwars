@@ -21,6 +21,8 @@ public class ShopItem extends ShopWare {
 			
 			this.enchants.add(new LeveledEnchantment(e, level));
 		}
+		
+		this.matName = this.matName.replace("SPECIAL_", "");
 	}
 	
 	public ShopItem(String shopString, LeveledEnchantment enchant) {
