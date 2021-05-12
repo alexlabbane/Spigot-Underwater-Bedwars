@@ -14,6 +14,7 @@ import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.BedwarsPlayer;
 import com.alexlabbane.underwaterbedwars.shoputil.ShopItem;
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
+import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 
 import net.md_5.bungee.api.ChatColor;
@@ -35,17 +36,24 @@ public class ItemShop extends Shop implements Listener {
 	public ItemShop(String color, BedwarsGame game) {
 		super(54, game, "Quick Buy");
 		this.color = color;
-		this.initializeItems();
+		this.initializeItems(null);
 	}
 	
 	public ItemShop(String color, BedwarsGame game, String title) {
 		super(54, game, title);
 		this.color = color;
-		this.initializeItems();
+		this.initializeItems(null);
+	}
+	
+	// Copy constructor
+	public ItemShop(String color, ItemShop itemShop) {
+		super(54, itemShop.getGame(), itemShop.getTitle());
+		this.color = color;
+		this.initializeItems(null);
 	}
 	
 	@Override
-	public void initializeItems() {
+	public void initializeItems(Player player) {
 		// Create links to other shop pages
 		this.inv.setItem(0, this.createShopLink("NETHER_STAR", 1, "Quick Buy", "SHOP_QUICK_BUY", this.color));
 		this.inv.setItem(1, this.createShopLink("TERRACOTTA", 1, "Blocks", "SHOP_BLOCKS", this.color));
@@ -60,7 +68,26 @@ public class ItemShop extends Shop implements Listener {
 		this.inv.setItem(19, this.createShopItem(this.color.toUpperCase() + "_WOOL", 16, "Buy Wool (4 iron)", 4, "IRON_INGOT"));
 		this.inv.setItem(20, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident II (10 iron)", 10, "IRON_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 2)}));
 		this.inv.setItem(21, this.createSpecialShopItem("SPECIAL_CHAINMAIL_BOOTS", 1, "Buy Chain Armor (40 iron)", 40, "IRON_INGOT")); // TODO: Add rest of items (iron armor, tools, etc)
-
+		
+		// Tools upgrades
+		if(player != null) {
+			// Pickaxe
+			switch(BedwarsTools.Pickaxe.getUpgrade(this.bedwarsGame.getBedwarsPlayer(player).getPickaxe())) {
+			case WOOD:
+				this.inv.setItem(22, this.createSpecialShopItem("SPECIAL_WOODEN_PICKAXE", 1, "Buy Wood Pickaxe (10 iron)", 10, "IRON_INGOT"));
+				break;
+			case IRON:
+				this.inv.setItem(22, this.createSpecialShopItem("SPECIAL_IRON_PICKAXE", 1, "Buy Iron Pickaxe (10 iron)", 10, "IRON_INGOT"));
+				break;
+			case GOLD:
+				this.inv.setItem(22, this.createSpecialShopItem("SPECIAL_GOLDEN_PICKAXE", 1, "Buy Gold Pickaxe (3 gold)", 3, "GOLD_INGOT"));
+				break;
+			case DIAMOND:
+				this.inv.setItem(22, this.createSpecialShopItem("SPECIAL_DIAMOND_PICKAXE", 1, "Buy Diamond Pickaxe (6 gold)", 6, "GOLD_INGOT"));
+				break;
+			}
+		}
+		
 		this.inv.setItem(30, this.createSpecialShopItem("SPECIAL_IRON_BOOTS", 1, "Buy Iron Armor (12 gold)", 12, "GOLD_INGOT")); // TODO: Add rest of items (iron armor, tools, etc)
 	}
 	
@@ -68,7 +95,6 @@ public class ItemShop extends Shop implements Listener {
 	public void handleLink(Player player, String shopLinkString) {
 		if(this.bedwarsGame.hasTeam(player)) {
 			// Open GUI of the other shop
-			player.sendMessage("Changing to " + shopLinkString);
 			String[] shopLinkItems = shopLinkString.split(",");
 			final String linkedShop = shopLinkItems[3];
 			
@@ -86,8 +112,12 @@ public class ItemShop extends Shop implements Listener {
 			case "SHOP_ARMOR":
 				newShop = new ArmorShop(this.color, this.bedwarsGame);
 				break;
+			case "SHOP_TOOLS":
+				newShop = new ToolShop(this.color, this.bedwarsGame);
+				break;
 			}
 			
+			newShop.initializeItems(player);
 			if(newShop != null)
 				newShop.openInventory((HumanEntity)player);
 		}
@@ -124,6 +154,9 @@ public class ItemShop extends Shop implements Listener {
 			}
 		}
 		
+		// Refresh the shop
+		this.initializeItems(player);
+		player.updateInventory();
 	}
 	
 	/**
@@ -137,6 +170,7 @@ public class ItemShop extends Shop implements Listener {
 		BedwarsPlayer bwPlayer = this.bedwarsGame.getBedwarsPlayer(player);
 		
 		switch(shopItem.getMatName()) {
+		/******************** ARMOR ********************/
 		case "SPECIAL_CHAINMAIL_BOOTS": // Chainmail armor
 			if(bwPlayer.getArmor().getLevel() < BedwarsArmor.CHAIN.getLevel()) {
 				// Upgrade is legal
@@ -179,6 +213,138 @@ public class ItemShop extends Shop implements Listener {
 				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 			}
 			break;
+			
+		/******************** PICKAXES ********************/
+		case "SPECIAL_WOODEN_PICKAXE":
+			if(bwPlayer.getPickaxe().getLevel() < BedwarsTools.Pickaxe.WOOD.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setPickaxe(BedwarsTools.Pickaxe.WOOD);
+				bwPlayer.setPlayerPickaxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Wood Pickaxe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better pickaxe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;
+		case "SPECIAL_IRON_PICKAXE":
+			if(bwPlayer.getPickaxe().getLevel() < BedwarsTools.Pickaxe.IRON.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setPickaxe(BedwarsTools.Pickaxe.IRON);
+				bwPlayer.setPlayerPickaxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Iron Pickaxe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better pickaxe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;
+		case "SPECIAL_GOLDEN_PICKAXE":
+			if(bwPlayer.getPickaxe().getLevel() < BedwarsTools.Pickaxe.GOLD.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setPickaxe(BedwarsTools.Pickaxe.GOLD);
+				bwPlayer.setPlayerPickaxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Gold Pickaxe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better pickaxe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;
+		case "SPECIAL_DIAMOND_PICKAXE":
+			if(bwPlayer.getPickaxe().getLevel() < BedwarsTools.Pickaxe.DIAMOND.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setPickaxe(BedwarsTools.Pickaxe.DIAMOND);
+				bwPlayer.setPlayerPickaxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Diamond Pickaxe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better pickaxe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;	
+			
+		/******************** AXES ********************/
+		case "SPECIAL_WOODEN_AXE":
+			if(bwPlayer.getAxe().getLevel() < BedwarsTools.Axe.WOOD.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setAxe(BedwarsTools.Axe.WOOD);
+				bwPlayer.setPlayerAxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Wood Axe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better axe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;
+		case "SPECIAL_IRON_AXE":
+			if(bwPlayer.getAxe().getLevel() < BedwarsTools.Axe.IRON.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setAxe(BedwarsTools.Axe.IRON);
+				bwPlayer.setPlayerAxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Iron Axe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better axe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;
+		case "SPECIAL_GOLDEN_AXE":
+			if(bwPlayer.getAxe().getLevel() < BedwarsTools.Axe.GOLD.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setAxe(BedwarsTools.Axe.GOLD);
+				bwPlayer.setPlayerAxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Gold Axe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better axe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;
+		case "SPECIAL_DIAMOND_AXE":
+			if(bwPlayer.getAxe().getLevel() < BedwarsTools.Axe.DIAMOND.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setAxe(BedwarsTools.Axe.DIAMOND);
+				bwPlayer.setPlayerAxe();
+				player.sendMessage(ChatColor.GREEN + "You bought a Diamond Axe for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have a better axe!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;	
+		
+		/******************** SHEARS ********************/
+		case "SPECIAL_SHEARS":
+			if(bwPlayer.getShears().getLevel() < BedwarsTools.Shears.SHEARS.getLevel()) {
+				// Upgrade is legal
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				shopItem.playerPay(player);
+				
+				bwPlayer.setShears(BedwarsTools.Shears.SHEARS);
+				bwPlayer.setPlayerShears();
+				player.sendMessage(ChatColor.GREEN + "You bought Shears for " + ChatColor.YELLOW + shopItem.getPayAmount() + "x " + shopItem.getPayMatName() + ".");
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have shears!");
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			}
+			break;	
 		}
 	}
 }

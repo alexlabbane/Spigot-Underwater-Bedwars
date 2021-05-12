@@ -111,13 +111,8 @@ public class BedwarsPlayer {
 			finishedArmor.get(2).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protLevel);
 		}
 		
-		inv.setBoots(finishedArmor.get(0));
-		inv.setLeggings(finishedArmor.get(1));
-		inv.setChestplate(finishedArmor.get(2));
-		inv.setHelmet(finishedArmor.get(3));
-		
 		// Dye to match color
-		for(ItemStack armor : inv.getArmorContents()) {
+		for(ItemStack armor : finishedArmor) {
 			ItemMeta meta = armor.getItemMeta();
 			if(meta instanceof LeatherArmorMeta) {
 				((LeatherArmorMeta) meta).setColor(this.getTeam().getColor().RGB());
@@ -125,7 +120,82 @@ public class BedwarsPlayer {
 			
 			armor.setItemMeta(meta);
 		}
+		
+		inv.setBoots(finishedArmor.get(0));
+		inv.setLeggings(finishedArmor.get(1));
+		inv.setChestplate(finishedArmor.get(2));
+		inv.setHelmet(finishedArmor.get(3));
 	}
+	
+	public void setPlayerStarterMaterials() {
+		PlayerInventory inv = this.player.getInventory();
+		
+		// Add team-wide starter materials
+		for(Pair<Material, LeveledEnchantment[]> itemPair : this.team.getStarterMaterials()) {
+			ItemStack item = new ItemStack(itemPair.getFirst());
+			if(itemPair.getSecond() != null)
+				for(LeveledEnchantment le : itemPair.getSecond())
+					item.addEnchantment(le.getEnchantment(), le.getLevel());
+
+			inv.addItem(item);
+		}
+		
+		// Add player specific materials (i.e. purchased tools)
+		ItemStack pickaxe;
+		switch(this.pickaxe) {
+		case WOOD:
+			pickaxe = new ItemStack(Material.WOODEN_PICKAXE);
+			pickaxe.addEnchantment(Enchantment.DIG_SPEED, 1);
+			inv.addItem(pickaxe);
+			break;
+		case IRON:
+			pickaxe = new ItemStack(Material.IRON_PICKAXE);
+			pickaxe.addEnchantment(Enchantment.DIG_SPEED, 2);
+			inv.addItem(pickaxe);
+			break;
+		case GOLD:
+			pickaxe = new ItemStack(Material.GOLDEN_PICKAXE);
+			pickaxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+			pickaxe.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+			inv.addItem(pickaxe);
+			break;
+		case DIAMOND:
+			pickaxe = new ItemStack(Material.DIAMOND_PICKAXE);
+			pickaxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+			inv.addItem(pickaxe);
+			break;
+		}
+		
+		ItemStack axe;
+		switch(this.axe) {
+		case WOOD:
+			axe = new ItemStack(Material.WOODEN_AXE);
+			axe.addEnchantment(Enchantment.DIG_SPEED, 1);
+			inv.addItem(axe);
+			break;
+		case IRON:
+			axe = new ItemStack(Material.IRON_AXE);
+			axe.addEnchantment(Enchantment.DIG_SPEED, 2);
+			inv.addItem(axe);
+			break;
+		case GOLD:
+			axe = new ItemStack(Material.GOLDEN_AXE);
+			axe.addEnchantment(Enchantment.DIG_SPEED, 3);
+			axe.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+			inv.addItem(axe);
+			break;
+		case DIAMOND:
+			axe = new ItemStack(Material.DIAMOND_AXE);
+			axe.addEnchantment(Enchantment.DIG_SPEED, 3);
+			inv.addItem(axe);
+			break;
+		}
+		
+		ItemStack shears = new ItemStack(Material.SHEARS);
+		if(this.shears == BedwarsTools.Shears.SHEARS)
+			inv.addItem(shears);
+	}
+	
 	
 	/**
 	 * Upgrade the pickaxe of a Bedwars Player
@@ -195,5 +265,71 @@ public class BedwarsPlayer {
 		}
 		
 		return false;
+	}
+	
+	public void setPlayerPickaxe() {
+		PlayerInventory inv = this.player.getInventory();
+		
+		if(inv.contains(Material.WOODEN_PICKAXE)
+				|| inv.contains(Material.IRON_PICKAXE)
+				|| inv.contains(Material.GOLDEN_PICKAXE)
+				|| inv.contains(Material.DIAMOND_PICKAXE)) 
+		{
+			// If player already has a pickaxe in their inventory, replace it with upgrade
+			for(int i = 0; i < inv.getContents().length; i++) {
+				if(inv.getContents()[i] != null
+						&& (inv.getContents()[i].getType() == Material.WOODEN_PICKAXE
+						|| inv.getContents()[i].getType() == Material.IRON_PICKAXE
+						|| inv.getContents()[i].getType() == Material.GOLDEN_PICKAXE
+						|| inv.getContents()[i].getType() == Material.DIAMOND_PICKAXE)) {
+					inv.setItem(i, BedwarsTools.Pickaxe.getBedwarsTool(this.pickaxe));
+				}
+			}
+		} else {
+			// If no pickaxe previously in inventory, add one to it
+			inv.addItem(BedwarsTools.Pickaxe.getBedwarsTool(this.pickaxe));
+		}
+	}
+	
+	public void setPlayerAxe() {
+		PlayerInventory inv = this.player.getInventory();
+		
+		if(inv.contains(Material.WOODEN_AXE)
+				|| inv.contains(Material.IRON_AXE)
+				|| inv.contains(Material.GOLDEN_AXE)
+				|| inv.contains(Material.DIAMOND_AXE)) 
+		{
+			// If player already has a pickaxe in their inventory, replace it with upgrade
+			for(int i = 0; i < inv.getContents().length; i++) {
+				if(inv.getContents()[i] != null
+						&& (inv.getContents()[i].getType() == Material.WOODEN_AXE
+						|| inv.getContents()[i].getType() == Material.IRON_AXE
+						|| inv.getContents()[i].getType() == Material.GOLDEN_AXE
+						|| inv.getContents()[i].getType() == Material.DIAMOND_AXE)) {
+					inv.setItem(i, BedwarsTools.Axe.getBedwarsTool(this.axe));
+				}
+			}
+		} else {
+			// If no pickaxe previously in inventory, add one to it
+			inv.addItem(BedwarsTools.Axe.getBedwarsTool(this.axe));
+		}
+	}
+	
+	public void setPlayerShears() {
+		PlayerInventory inv = this.player.getInventory();
+		
+		if(inv.contains(Material.SHEARS))
+		{
+			// If player already has a pickaxe in their inventory, replace it with upgrade
+			for(int i = 0; i < inv.getContents().length; i++) {
+				if(inv.getContents()[i] != null
+						&& (inv.getContents()[i].getType() == Material.SHEARS)) {
+					inv.setItem(i, BedwarsTools.Shears.getBedwarsTool(this.shears));
+				}
+			}
+		} else {
+			// If no pickaxe previously in inventory, add one to it
+			inv.addItem(BedwarsTools.Shears.getBedwarsTool(this.shears));
+		}
 	}
 }

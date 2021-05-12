@@ -1,5 +1,9 @@
 package com.alexlabbane.underwaterbedwars.util;
 
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+
 /**
  * Class to encompass enums for all of the upgradeable tools in Bedwars
  * This includes the pickaxe, axe, and shears
@@ -74,6 +78,56 @@ public class BedwarsTools {
 			// Default; should be impossible
 			return NONE;
 		}
+		
+		/**
+		 * Get the name of the material for each level of pickaxe
+		 * @param pickaxe
+		 * @return String the name of the material
+		 */
+		public static String getMaterialName(BedwarsTools.Pickaxe pickaxe) {
+			switch(pickaxe) {
+			case WOOD:
+				return "WOODEN_PICKAXE";
+			case IRON:
+				return "IRON_PICKAXE";
+			case GOLD:
+				return "GOLDEN_PICKAXE";
+			case DIAMOND:
+				return "DIAMOND_PICKAXE";
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * Get ItemStack for the specified pickaxe level
+		 * Adds enchantments as well
+		 * @param pickaxe
+		 * @return ItemStack the bedwars pickaxe associated with pickaxe param
+		 */
+		public static ItemStack getBedwarsTool(BedwarsTools.Pickaxe pickaxe) {
+			ItemStack newPickaxe = null;
+			if(pickaxe != BedwarsTools.Pickaxe.NONE)
+				newPickaxe = new ItemStack(Material.getMaterial(BedwarsTools.Pickaxe.getMaterialName(pickaxe)));
+
+			switch(pickaxe) {
+			case WOOD:
+				newPickaxe.addEnchantment(Enchantment.DIG_SPEED, 1);
+				break;
+			case IRON:
+				newPickaxe.addEnchantment(Enchantment.DIG_SPEED, 2);
+				break;
+			case GOLD:
+				newPickaxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+				newPickaxe.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+				break;
+			case DIAMOND:
+				newPickaxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+				break;
+			}
+			
+			return newPickaxe;
+		}
 	}
 	
 	/**
@@ -143,6 +197,56 @@ public class BedwarsTools {
 			// Default; should be impossible
 			return NONE;
 		}
+		
+		/**
+		 * Get the name of the material for each level of axe
+		 * @param axe
+		 * @return String the name of the material
+		 */
+		public static String getMaterialName(BedwarsTools.Axe axe) {
+			switch(axe) {
+			case WOOD:
+				return "WOODEN_AXE";
+			case IRON:
+				return "IRON_AXE";
+			case GOLD:
+				return "GOLDEN_AXE";
+			case DIAMOND:
+				return "DIAMOND_AXE";
+			}
+			
+			return null;
+		}
+		
+		/**
+		 * Get ItemStack for the specified axe level
+		 * Adds enchantments as well
+		 * @param axe
+		 * @return ItemStack the bedwars axe associated with axe param
+		 */
+		public static ItemStack getBedwarsTool(BedwarsTools.Axe axe) {
+			ItemStack newAxe = null;
+			if(axe != BedwarsTools.Axe.NONE)
+				newAxe = new ItemStack(Material.getMaterial(BedwarsTools.Axe.getMaterialName(axe)));
+
+			switch(axe) {
+			case WOOD:
+				newAxe.addEnchantment(Enchantment.DIG_SPEED, 1);
+				break;
+			case IRON:
+				newAxe.addEnchantment(Enchantment.DIG_SPEED, 2);
+				break;
+			case GOLD:
+				newAxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+				newAxe.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+				break;
+			case DIAMOND:
+				newAxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+				break;
+			}
+			
+			return newAxe;
+		}
 	}
 	
 	/**
@@ -176,6 +280,29 @@ public class BedwarsTools {
 			
 			// Default; should be impossible
 			return NONE;
+		}
+		
+		/**
+		 * Get the name of the material for each level of shears
+		 * @param shears
+		 * @return String the name of the material
+		 */
+		public static String getMaterialName(BedwarsTools.Shears shears) {
+			return "SHEARS";
+		}
+		
+		/**
+		 * Get ItemStack for the specified shears level
+		 * Adds enchantments as well
+		 * @param shears
+		 * @return ItemStack the bedwars shears associated with shears param
+		 */
+		public static ItemStack getBedwarsTool(BedwarsTools.Shears shears) {
+			ItemStack newShears = null;
+			if(shears != BedwarsTools.Shears.NONE)
+				newShears = new ItemStack(Material.getMaterial(BedwarsTools.Shears.getMaterialName(shears)));
+			
+			return newShears;
 		}
 	}
 }

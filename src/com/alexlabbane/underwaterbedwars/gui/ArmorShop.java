@@ -13,7 +13,7 @@ public class ArmorShop extends ItemShop implements Listener {
 	}
 
 	@Override
-	public void initializeItems() {
+	public void initializeItems(Player player) {
 		// Create links to other shop pages
 		this.inv.setItem(0, this.createShopLink("NETHER_STAR", 1, "Quick Buy", "SHOP_QUICK_BUY", this.color));
 		this.inv.setItem(1, this.createShopLink("TERRACOTTA", 1, "Blocks", "SHOP_BLOCKS", this.color));

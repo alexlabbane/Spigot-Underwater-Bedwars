@@ -142,7 +142,7 @@ public class BedwarsTeam implements Listener {
 		newBedwarsPlayer.setTeam(this);
 		player.getInventory().clear();
 		this.game.getBedwarsPlayer(player).setPlayerArmor();
-		this.setPlayerStarterMaterials(player);
+		this.game.getBedwarsPlayer(player).setPlayerStarterMaterials();
 	}
 	
 	public boolean hasPlayer(Player player) {
@@ -164,7 +164,14 @@ public class BedwarsTeam implements Listener {
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player p = e.getEntity();
 		e.getDrops().clear();
-		if(this.hasPlayer(p)) {
+		
+		// Downgrade tools
+		BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(p);
+		
+		if(bwPlayer != null && this.hasPlayer(p)) {
+			bwPlayer.downgradeAxe();
+			bwPlayer.downgradePickaxe();
+			
 			// Respawn player immediately in spectator
 			new BukkitRunnable() {
 				@Override
@@ -191,8 +198,8 @@ public class BedwarsTeam implements Listener {
 				public void run() {
 					// TODO: Send to teams respawn location
 					p.setGameMode(GameMode.SURVIVAL);
-					game.getBedwarsPlayer(p).setPlayerArmor();
-					setPlayerStarterMaterials(p); // DEPRECATED
+					bwPlayer.setPlayerArmor();
+					bwPlayer.setPlayerStarterMaterials();
 				}
 			}.runTaskLater(this.plugin, 20 * 5);			
 		}
@@ -223,7 +230,11 @@ public class BedwarsTeam implements Listener {
 		Entity entity = e.getRightClicked();
 		
 		if(entity == this.itemShopVillager) {
-			this.itemShop.openInventory((HumanEntity)p);
+			// Each player opens their own instance of the shop
+			ItemShop playerShop = new ItemShop(this.teamColor.getColor(), this.itemShop);
+			playerShop.initializeItems(p); // Populate with player specific tool upgrades
+			playerShop.openInventory((HumanEntity)p);
+			// this.itemShop.openInventory((HumanEntity)p); // DEPRECATED: each player opens same instance of the shop
 		}
 	}
 }

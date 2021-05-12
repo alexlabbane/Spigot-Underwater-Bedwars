@@ -22,20 +22,26 @@ import com.alexlabbane.underwaterbedwars.util.Util;
 public abstract class Shop implements Listener {
 	protected final BedwarsGame bedwarsGame;
 	protected final Inventory inv;
+	protected final String title;
 	
 	public Shop(int shopSize, BedwarsGame game) {
 		this.bedwarsGame = game;
-		this.inv = Bukkit.createInventory(null, shopSize, "Item Shop");
+		this.title = "Item Shop";
+		this.inv = Bukkit.createInventory(null, shopSize, this.title);
     	Bukkit.getServer().getPluginManager().registerEvents(this, this.bedwarsGame.getPlugin());
 	}
 	
 	public Shop(int shopSize, BedwarsGame game, String shopTitle) {
 		this.bedwarsGame = game;
 		this.inv = Bukkit.createInventory(null, shopSize, shopTitle);
+		this.title = shopTitle;
     	Bukkit.getServer().getPluginManager().registerEvents(this, this.bedwarsGame.getPlugin());
 	}
 	
-	public abstract void initializeItems();
+	public BedwarsGame getGame() { return this.bedwarsGame; }
+	public String getTitle() { return this.title; }
+	
+	public abstract void initializeItems(Player player);
 	public abstract void handleTransaction(Player player, String shopCostString);
 	public abstract void handleLink(Player player, String shopLinkString);
 	
