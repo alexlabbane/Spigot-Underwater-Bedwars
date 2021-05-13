@@ -20,9 +20,7 @@ public class ShopItem extends ShopWare {
 			int level = Integer.parseInt(splitString[i+1]);
 			
 			this.enchants.add(new LeveledEnchantment(e, level));
-		}
-		
-		this.matName = this.matName.replace("SPECIAL_", "");
+		}		
 	}
 	
 	public ShopItem(String shopString, LeveledEnchantment enchant) {

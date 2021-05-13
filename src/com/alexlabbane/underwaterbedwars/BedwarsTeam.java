@@ -139,7 +139,7 @@ public class BedwarsTeam implements Listener {
 		if(!this.getPlayers().contains(player))
 			bwPlayers.add(newBedwarsPlayer);
 		
-		newBedwarsPlayer.setTeam(this);
+		this.game.getBedwarsPlayer(player).setTeam(this);
 		player.getInventory().clear();
 		this.game.getBedwarsPlayer(player).setPlayerArmor();
 		this.game.getBedwarsPlayer(player).setPlayerStarterMaterials();
