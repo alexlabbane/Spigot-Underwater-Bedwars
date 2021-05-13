@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -71,6 +72,12 @@ public class BedwarsTeam implements Listener {
 		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
 		this.itemShopVillager.setSilent(true);
 		Util.freezeEntity(this.itemShopVillager);
+		this.setItemShopLocation(new Location(
+				this.itemShopVillager.getWorld(),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.x"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.y"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z")
+			));
 		
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
@@ -92,9 +99,19 @@ public class BedwarsTeam implements Listener {
 		
 		// DEBUG
 		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
+		
+		Location itemShopLocation = new Location(
+				this.itemShopVillager.getWorld(),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.x"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.y"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z"));
+		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.pitch"));
+		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.yaw"));
+		this.setItemShopLocation(itemShopLocation);
+		
 		this.itemShopVillager.setSilent(true);
 		Util.freezeEntity(this.itemShopVillager);
-
+		
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
@@ -123,9 +140,16 @@ public class BedwarsTeam implements Listener {
 	
 	public void setItemShopLocation(Location loc) {
 		this.itemShopLocation = loc;
-		this.itemShopVillager.teleport(loc);
 		
-		Bukkit.getServer().broadcastMessage("Setting location of villager");
+		// Delay teleportation by 1 second
+		// Fixed undesirable teleportation lag
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				itemShopVillager.teleport(loc);
+			}
+		}.runTaskLater(this.plugin, 20);
+		
 	}
 	
 	public void initializeStarterMaterials() {

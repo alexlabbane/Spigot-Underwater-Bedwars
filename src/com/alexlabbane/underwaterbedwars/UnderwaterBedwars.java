@@ -29,6 +29,7 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     @Override
     public void onEnable() {
     	Util.setPlugin(this);
+    	this.saveDefaultConfig();
     	
     	game = new BedwarsGame(this);
     	

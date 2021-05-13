@@ -35,7 +35,7 @@ public class RangedShop extends ItemShop implements Listener {
 				new LeveledEnchantment[] {new LeveledEnchantment(Enchantment.ARROW_DAMAGE, 1)}));
 		
 		// Punch bow
-		this.inv.setItem(21, this.createEnchantedShopItem("BOW", 1, "Buy Bow (Power I, Punch I) (6 emerald)", 6, "EMERALD", 
+		this.inv.setItem(22, this.createEnchantedShopItem("BOW", 1, "Buy Bow (Power I, Punch I) (6 emerald)", 6, "EMERALD", 
 				new LeveledEnchantment[] {
 						new LeveledEnchantment(Enchantment.ARROW_DAMAGE, 1), 
 						new LeveledEnchantment(Enchantment.ARROW_KNOCKBACK, 1)
