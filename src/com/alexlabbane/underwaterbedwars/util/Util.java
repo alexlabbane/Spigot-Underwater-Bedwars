@@ -1,12 +1,15 @@
 package com.alexlabbane.underwaterbedwars.util;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
+
+import net.minecraft.server.v1_16_R2.NBTTagCompound;
 
 public class Util {
 	static Plugin plugin;
@@ -89,6 +92,14 @@ public class Util {
 		
 	}
 	
+	public static void freezeEntity(Entity en){
+	    net.minecraft.server.v1_16_R2.Entity nmsEn = ((CraftEntity) en).getHandle();
+	    NBTTagCompound compound = new NBTTagCompound();
+	    nmsEn.d(compound);
+	    compound.setByte("NoAI", (byte) 1);
+	    nmsEn.load(compound);
+	}
+	  
 	public static String getCommonPotionName(PotionEffectType pet) {
 		switch(pet.getName()) {
 		case "SPEED":

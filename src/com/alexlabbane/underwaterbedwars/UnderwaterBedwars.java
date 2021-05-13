@@ -83,6 +83,16 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     			testShop.openInventory((HumanEntity)sender);
     		
     		return true;
+    	} else if(label.equals("setitemshoplocation") && sender instanceof Player) {
+    		//getServer().broadcastMessage("Color is " + args[0]);
+    		TeamColor color = TeamColor.valueOf(args[0]);
+    		
+    		for(BedwarsTeam team : this.game.getTeams()) {
+    			if(team.getColor() == color) {
+    				team.setItemShopLocation(((Player) sender).getLocation());
+    			}
+    		}
+    		
     	} else if(label.equals("bwteam")) {
     		if(args.length == 0) {
     			if(sender instanceof Player) {

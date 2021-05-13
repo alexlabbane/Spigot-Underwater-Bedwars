@@ -27,6 +27,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import com.alexlabbane.underwaterbedwars.gui.ItemShop;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
+import com.alexlabbane.underwaterbedwars.util.Util;
 import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
@@ -48,6 +49,14 @@ public class BedwarsTeam implements Listener {
 	private Location itemShopLocation;
 	private Entity itemShopVillager;
 	
+	private Location teamShopLocation;
+	
+	// Other important locations
+	private Location bedLocation;
+	private Location genLocation;
+	private Location chestLocation;
+	private Location enderChestLocation;
+	
 	public BedwarsTeam(ArrayList<BedwarsPlayer> players, String color, Plugin p, BedwarsGame game) {
 		this.plugin = p;
 		this.teamColor = TeamColor.valueOf(color.toUpperCase());
@@ -60,6 +69,8 @@ public class BedwarsTeam implements Listener {
 		this.itemShop = new ItemShop(color, game);
 		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
 		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
+		this.itemShopVillager.setSilent(true);
+		Util.freezeEntity(this.itemShopVillager);
 		
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
@@ -81,7 +92,9 @@ public class BedwarsTeam implements Listener {
 		
 		// DEBUG
 		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
-		
+		this.itemShopVillager.setSilent(true);
+		Util.freezeEntity(this.itemShopVillager);
+
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
@@ -107,6 +120,13 @@ public class BedwarsTeam implements Listener {
 	
 	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterMaterials() { return this.starterMaterials; }
 	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() { return this.starterArmor; }
+	
+	public void setItemShopLocation(Location loc) {
+		this.itemShopLocation = loc;
+		this.itemShopVillager.teleport(loc);
+		
+		Bukkit.getServer().broadcastMessage("Setting location of villager");
+	}
 	
 	public void initializeStarterMaterials() {
 		this.starterMaterials.add(new Pair<Material, LeveledEnchantment[]>(Material.TRIDENT, new LeveledEnchantment[]{ new LeveledEnchantment(Enchantment.LOYALTY, 1) })); // trident always at index 0
