@@ -90,13 +90,18 @@ public class ItemShop extends Shop implements Listener {
 				break;
 			}
 		}
-
+		
+		this.inv.setItem(23, this.createShopItem("BOW", 1, "Buy Bow (12 gold)", 12, "GOLD_INGOT"));
+		this.inv.setItem(24, this.createPotionShopItem("SPEED", 1, 20 * 45, "Buy Speed Potion (1 emerald)", 1, "EMERALD"));
+		this.inv.setItem(25, this.createShopItem("TNT", 1, "Buy TNT (4 gold)", 4, "GOLD_INGOT"));
+		
 		this.inv.setItem(28, this.createShopItem("OAK_PLANKS", 16, "Buy Wood (4 gold)", 4, "GOLD_INGOT"));
 		this.inv.setItem(29, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident III (7 gold)", 7, "GOLD_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 3)}));
 		this.inv.setItem(30, this.createSpecialShopItem("SPECIAL_IRON_BOOTS", 1, "Buy Iron Armor (12 gold)", 12, "GOLD_INGOT")); // TODO: Add rest of items (iron armor, tools, etc)
 		this.inv.setItem(31, this.createSpecialShopItem("SPECIAL_SHEARS", 1, "Buy Shears (20 iron)", 20, "IRON_INGOT"));
 		this.inv.setItem(32, this.createShopItem("ARROW", 8, "Buy Arrows (2 gold)", 2, "GOLD_INGOT"));
-		this.inv.setItem(33, this.createPotionShopItem("SPEED", 1, 20 * 45, "Buy Speed Potion (1 emerald)", 1, "EMERALD"));
+		this.inv.setItem(33, this.createPotionShopItem("INVISIBILITY", 0, 20 * 30, "Buy Invisibility Potion (2 emerald)", 2, "EMERALD"));
+		this.inv.setItem(34, this.createShopItem("WATER_BUCKET", 1, "Buy Water Bucket (3 gold)", 3, "GOLD_INGOT"));
 	}
 	
 	@Override
@@ -122,6 +127,15 @@ public class ItemShop extends Shop implements Listener {
 				break;
 			case "SHOP_TOOLS":
 				newShop = new ToolShop(this.color, this.bedwarsGame);
+				break;
+			case "SHOP_RANGED":
+				newShop = new RangedShop(this.color, this.bedwarsGame);
+				break;
+			case "SHOP_POTIONS":
+				newShop = new PotionShop(this.color, this.bedwarsGame);
+				break;
+			case "SHOP_UTILITIES":
+				newShop = new UtilityShop(this.color, this.bedwarsGame);
 				break;
 			}
 			
