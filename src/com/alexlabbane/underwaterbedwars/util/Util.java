@@ -1,8 +1,12 @@
 package com.alexlabbane.underwaterbedwars.util;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -111,5 +115,29 @@ public class Util {
 		}
 		
 		return "Undefined";
+	}
+	
+	/**
+	 * Counts the number of dropped items matching mat
+	 * in a radius r around the location
+	 * @param loc
+	 * @param mat
+	 * @param r
+	 * @return
+	 */
+	public static int countDroppedItems(Location loc, Material mat, float r) {
+		Entity[] chunkEntities = loc.getChunk().getEntities();
+		
+		int count = 0;
+		
+		for(Entity en : chunkEntities) {
+			if(en instanceof Item) {
+				Item itm = (Item)en;
+				
+				if(itm.getItemStack().getType() == mat) count += itm.getItemStack().getAmount();
+			}
+		}
+		
+		return count;
 	}
 }

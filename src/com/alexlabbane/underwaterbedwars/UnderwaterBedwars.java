@@ -33,14 +33,14 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	
     	game = new BedwarsGame(this);
     	
-    	game.addTeam(TeamColor.PINK);
-    	game.addTeam(TeamColor.AQUA);
+//    	game.addTeam(TeamColor.PINK);
+//    	game.addTeam(TeamColor.AQUA);
     	game.addTeam(TeamColor.BLUE);
-    	game.addTeam(TeamColor.GRAY);
-    	game.addTeam(TeamColor.GREEN);
-    	game.addTeam(TeamColor.RED);
-    	game.addTeam(TeamColor.WHITE);
-    	game.addTeam(TeamColor.YELLOW);
+//    	game.addTeam(TeamColor.GRAY);
+//    	game.addTeam(TeamColor.GREEN);
+//    	game.addTeam(TeamColor.RED);
+//    	game.addTeam(TeamColor.WHITE);
+//    	game.addTeam(TeamColor.YELLOW);
 
     	
     	testShop = new ItemShop("PINK", game);

@@ -11,6 +11,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -24,6 +25,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 
 import com.alexlabbane.underwaterbedwars.gui.ItemShop;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
@@ -52,9 +55,12 @@ public class BedwarsTeam implements Listener {
 	
 	private Location teamShopLocation;
 	
+	// Gen stuff
+	private BukkitTask genSpawner;
+	private Location genLocation;
+
 	// Other important locations
 	private Location bedLocation;
-	private Location genLocation;
 	private Location chestLocation;
 	private Location enderChestLocation;
 	
@@ -72,17 +78,26 @@ public class BedwarsTeam implements Listener {
 		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
 		this.itemShopVillager.setSilent(true);
 		Util.freezeEntity(this.itemShopVillager);
-		this.setItemShopLocation(new Location(
+		Location itemShopLocation = new Location(
 				this.itemShopVillager.getWorld(),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.x"),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.y"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z")
-			));
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z"));
+		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.pitch"));
+		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.yaw"));
+		this.setItemShopLocation(itemShopLocation);
+		
+		this.setGenLocation(new Location(
+				this.itemShopLocation.getWorld(),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.x"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.y"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.z")));
 		
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
 		this.initializeStarterArmor();
+		this.initializeGen();
 	}
 	
 	public BedwarsTeam(String color, Plugin p, BedwarsGame game) {
@@ -109,6 +124,12 @@ public class BedwarsTeam implements Listener {
 		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.yaw"));
 		this.setItemShopLocation(itemShopLocation);
 		
+		this.setGenLocation(new Location(
+				this.itemShopLocation.getWorld(),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.x"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.y"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.z")));
+		
 		this.itemShopVillager.setSilent(true);
 		Util.freezeEntity(this.itemShopVillager);
 		
@@ -116,6 +137,7 @@ public class BedwarsTeam implements Listener {
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
 		this.initializeStarterArmor();
+		this.initializeGen();
 	}
 	
 	public ArrayList<BedwarsPlayer> getBedwarsPlayers() { return this.bwPlayers; }
@@ -148,8 +170,11 @@ public class BedwarsTeam implements Listener {
 			public void run() {
 				itemShopVillager.teleport(loc);
 			}
-		}.runTaskLater(this.plugin, 20);
-		
+		}.runTaskLater(this.plugin, 20);	
+	}
+	
+	public void setGenLocation(Location loc) {
+		this.genLocation = loc;
 	}
 	
 	public void initializeStarterMaterials() {
@@ -161,6 +186,40 @@ public class BedwarsTeam implements Listener {
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_LEGGINGS, null)); // leggings always index 1
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_CHESTPLATE, null)); // chestplate always index 2
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_HELMET, new LeveledEnchantment[] { new LeveledEnchantment(Enchantment.WATER_WORKER, 1)} )); // helmet always index 3
+	}
+	
+	public void initializeGen() {
+		if(this.genSpawner != null)
+			this.genSpawner.cancel();		
+		
+		this.genSpawner = new BukkitRunnable() {
+			int counter = 0;
+			
+			@Override
+			public void run() {
+				// TODO: Count how much stuff already in the gen
+				// Write utility function to get all entities in certain radius of location??
+				
+				ItemStack iron = new ItemStack(Material.IRON_INGOT);
+				
+				if(Util.countDroppedItems(genLocation, iron.getType(), 1.5f) < 48) {
+					Item droppedIron = genLocation.getWorld().dropItem(genLocation, iron);
+					droppedIron.setVelocity(new Vector(0, 0, 0));
+				}
+				
+				if(counter % 4 == 0) {
+					// Spawn gold 1/4 as often
+					ItemStack gold = new ItemStack(Material.GOLD_INGOT);
+					
+					if(Util.countDroppedItems(genLocation, gold.getType(), 1.5f) < 16) {
+						Item droppedGold = genLocation.getWorld().dropItem(genLocation, gold);
+						droppedGold.setVelocity(new Vector(0, 0, 0));	
+					}
+				}
+				counter++;
+			}
+			
+		}.runTaskTimer(this.plugin, 20, 15);
 	}
 	
 	// TODO: Perform this in BedwarsPlayer class
