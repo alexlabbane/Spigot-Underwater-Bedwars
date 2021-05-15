@@ -29,8 +29,11 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import com.alexlabbane.underwaterbedwars.gui.ItemShop;
+import com.alexlabbane.underwaterbedwars.gui.TeamShop;
+import com.alexlabbane.underwaterbedwars.gui.TrapShop;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
+import com.alexlabbane.underwaterbedwars.util.TrapQueue;
 import com.alexlabbane.underwaterbedwars.util.Util;
 import com.mojang.datafixers.util.Pair;
 
@@ -45,15 +48,23 @@ public class BedwarsTeam implements Listener {
 	private ArrayList<Pair<Material, LeveledEnchantment[]>> starterArmor;
 	
 	// Team upgrades (TODO: add the rest)
-	private boolean sharpness;
+	private int impalingLevel;
 	private int protLevel;
+	private int hasteLevel;
+	private int forgeLevel;
+	private int healPoolLevel;
+	
+	private TrapQueue traps;
 	
 	// Shop stuff
 	private ItemShop itemShop;
 	private Location itemShopLocation;
 	private Entity itemShopVillager;
 	
+	private TeamShop teamShop;
+	private TrapShop trapShop;
 	private Location teamShopLocation;
+	private Entity teamShopVillager;
 	
 	// Gen stuff
 	private BukkitTask genSpawner;
@@ -65,74 +76,66 @@ public class BedwarsTeam implements Listener {
 	private Location enderChestLocation;
 	
 	public BedwarsTeam(ArrayList<BedwarsPlayer> players, String color, Plugin p, BedwarsGame game) {
-		this.plugin = p;
-		this.teamColor = TeamColor.valueOf(color.toUpperCase());
 		this.bwPlayers = players;
-		this.game = game;
-		
-		this.sharpness = false;
-		this.protLevel = 0;
-		
-		this.itemShop = new ItemShop(color, game);
-		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
-		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
-		this.itemShopVillager.setSilent(true);
-		Util.freezeEntity(this.itemShopVillager);
-		Location itemShopLocation = new Location(
-				this.itemShopVillager.getWorld(),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.x"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.y"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z"));
-		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.pitch"));
-		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.yaw"));
-		this.setItemShopLocation(itemShopLocation);
-		
-		this.setGenLocation(new Location(
-				this.itemShopLocation.getWorld(),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.x"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.y"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.z")));
-		
-		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
-		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
-		this.initializeStarterMaterials();
-		this.initializeStarterArmor();
-		this.initializeGen();
+		this.initializeTeam(color, p, game);
 	}
 	
 	public BedwarsTeam(String color, Plugin p, BedwarsGame game) {
+		this.bwPlayers = new ArrayList<BedwarsPlayer>();
+		this.initializeTeam(color, p, game);
+	}
+	
+	private void initializeTeam(String color, Plugin p, BedwarsGame game) {
 		this.plugin = p;
 		this.teamColor = TeamColor.valueOf(color.toUpperCase());
-		this.bwPlayers = new ArrayList<BedwarsPlayer>();
 		this.game = game;
 		
-		this.sharpness = false;
+		this.impalingLevel = 0;
 		this.protLevel = 0;
+		this.hasteLevel = 0;
+		this.forgeLevel = 0;
+		this.healPoolLevel = 0;
+		this.traps = new TrapQueue();
 		
+		// Initialize item shop
 		this.itemShop = new ItemShop(color, game);
-		Bukkit.getServer().getPluginManager().registerEvents(this.itemShop, this.plugin);
-		
-		// DEBUG
-		this.itemShopVillager = Bukkit.getServer().getPlayer("alab11").getWorld().spawnEntity(Bukkit.getServer().getPlayer("alab11").getLocation(), EntityType.VILLAGER);
 		
 		Location itemShopLocation = new Location(
-				this.itemShopVillager.getWorld(),
+				Bukkit.getServer().getWorlds().get(0),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.x"),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.y"),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z"));
 		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.pitch"));
 		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.yaw"));
+		this.itemShopVillager = itemShopLocation.getWorld().spawnEntity(itemShopLocation, EntityType.VILLAGER);
 		this.setItemShopLocation(itemShopLocation);
 		
+		this.itemShopVillager.setSilent(true);
+		Util.freezeEntity(this.itemShopVillager);
+		
+		// TODO: Initialize team shop
+		this.teamShop = new TeamShop(color, game);
+		this.trapShop = new TrapShop(color, game);
+		
+		Location teamShopLocation = new Location(
+				Bukkit.getServer().getWorlds().get(0),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.x"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.y"),
+				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.z"));
+		teamShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.pitch"));
+		teamShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.yaw"));
+		this.teamShopVillager = teamShopLocation.getWorld().spawnEntity(teamShopLocation, EntityType.VILLAGER);
+		this.setTeamShopLocation(teamShopLocation);
+		
+		this.teamShopVillager.setSilent(true);
+		Util.freezeEntity(this.teamShopVillager);		
+		// Initialize gen
 		this.setGenLocation(new Location(
 				this.itemShopLocation.getWorld(),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.x"),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.y"),
 				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.z")));
-		
-		this.itemShopVillager.setSilent(true);
-		Util.freezeEntity(this.itemShopVillager);
-		
+				
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
@@ -150,27 +153,42 @@ public class BedwarsTeam implements Listener {
 	}
 	
 	public TeamColor getColor() { return this.teamColor; }
+	public TrapQueue getQueuedTraps() { return this.traps; }
+	public TeamShop getTeamShop() { return this.teamShop; }
+	public TrapShop getTrapShop() { return this.trapShop; }
 	
-	public void setSharpness(boolean b) { this.sharpness = b; }
-	public boolean hasSharpness() { return this.sharpness; }
+	public void setImpalingLevel(int level) { this.impalingLevel = level; }
+	public int getImpalingLevel() { return this.impalingLevel; }
 	
-	public void setProtectionLevel(int level) { this.protLevel = level; }
+	public void setProtectionLevel(int level) { 
+		this.protLevel = level;
+		
+		// Update player armor
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			bwPlayer.setPlayerArmor();
+	}
 	public int getProtLevel() { return this.protLevel; }
 	
 	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterMaterials() { return this.starterMaterials; }
 	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() { return this.starterArmor; }
 	
-	public void setItemShopLocation(Location loc) {
-		this.itemShopLocation = loc;
+	public void setItemShopLocation(Location loc) { this.setShopLocation("ITEM", loc, this.itemShopVillager); }
+	public void setTeamShopLocation(Location loc) {	this.setShopLocation("TEAM", loc, this.teamShopVillager); }
+	
+	private void setShopLocation(String shopType, Location newLoc, Entity shopEntity) {
+		if(shopType.equals("ITEM"))
+			this.itemShopLocation = newLoc;
+		else if(shopType.equals("TEAM"))
+			this.teamShopLocation = newLoc;
 		
 		// Delay teleportation by 1 second
 		// Fixed undesirable teleportation lag
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				itemShopVillager.teleport(loc);
+				shopEntity.teleport(newLoc);
 			}
-		}.runTaskLater(this.plugin, 20);	
+		}.runTaskLater(this.plugin, 20);
 	}
 	
 	public void setGenLocation(Location loc) {
@@ -197,9 +215,6 @@ public class BedwarsTeam implements Listener {
 			
 			@Override
 			public void run() {
-				// TODO: Count how much stuff already in the gen
-				// Write utility function to get all entities in certain radius of location??
-				
 				ItemStack iron = new ItemStack(Material.IRON_INGOT);
 				
 				if(Util.countDroppedItems(genLocation, iron.getType(), 1.5f) < 48) {
@@ -338,6 +353,9 @@ public class BedwarsTeam implements Listener {
 			playerShop.initializeItems(p); // Populate with player specific tool upgrades
 			playerShop.openInventory((HumanEntity)p);
 			// this.itemShop.openInventory((HumanEntity)p); // DEPRECATED: each player opens same instance of the shop
+		} else if (entity == this.teamShopVillager) {
+			// Players open the same instance of the team shop
+			this.game.getTeam(p).teamShop.openInventory((HumanEntity)p);
 		}
 	}
 }
