@@ -18,6 +18,7 @@ public class TrapQueue {
 	}
 	
 	public int size() { return this.size; }
+	public boolean full() { return this.size >= MAX_NUM_TRAPS; }
 	
 	public TeamTrap front() {
 		if(this.size == 0)
