@@ -1,4 +1,9 @@
 blue-team:
+  base-bounds:
+    x-min: -14
+    x-max: 14
+    z-min: 2
+    z-max: 16
   gen-location:
     x: -12.5
     y: 44
@@ -15,7 +20,7 @@ blue-team:
     z: 14.448
     pitch: 0
     yaw: 179.9
-
+    
 pink-team:
   item-shop-location:
     x: -7.559

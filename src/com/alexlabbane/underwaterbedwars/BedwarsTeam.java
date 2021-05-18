@@ -24,6 +24,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -55,6 +57,7 @@ public class BedwarsTeam implements Listener {
 	private int healPoolLevel;
 	
 	private TrapQueue traps;
+	private BukkitTask healPool;
 	
 	// Shop stuff
 	private ItemShop itemShop;
@@ -96,6 +99,7 @@ public class BedwarsTeam implements Listener {
 		this.forgeLevel = 0;
 		this.healPoolLevel = 0;
 		this.traps = new TrapQueue();
+		this.healPool = null;
 		
 		// Initialize item shop
 		this.itemShop = new ItemShop(color, game);
@@ -243,7 +247,7 @@ public class BedwarsTeam implements Listener {
 				}
 				
 				if(counter % 4 == 0) {
-					// Spawn gold 1/4 as often
+					// Spawn gold 1/4 as often as iron
 					ItemStack gold = new ItemStack(Material.GOLD_INGOT);
 					
 					if(Util.countDroppedItems(genLocation, gold.getType(), 1.5f) < 16) {
@@ -251,10 +255,66 @@ public class BedwarsTeam implements Listener {
 						droppedGold.setVelocity(new Vector(0, 0, 0));	
 					}
 				}
+				
+				if(counter % 32 == 0 && forgeLevel >= 3) {
+					// Spawn emerald 1/32 as often as iron
+					ItemStack emerald = new ItemStack(Material.EMERALD);
+					if(Util.countDroppedItems(genLocation, emerald.getType(), 1.5f) < 4) {
+						Item droppedEmerald = genLocation.getWorld().dropItem(genLocation, emerald);
+						droppedEmerald.setVelocity(new Vector(0, 0, 0));
+					}
+				}
+				
 				counter++;
 			}
 			
-		}.runTaskTimer(this.plugin, 20, 15);
+		}.runTaskTimer(this.plugin, 20, getGenDelay());
+	}
+	
+	private int getGenDelay() {
+		switch(this.forgeLevel) {
+		case 0:
+			return 20;
+		case 1:
+			return 15;
+		case 2:
+			return 10;
+		case 3:
+			return 10;
+		case 4:
+			return 5;
+		}
+		
+		return 20;
+	}
+	
+	public void startHealPool() {
+		if(this.healPoolLevel == 0)
+			return;
+		
+		// Poll once/sec for players on team that get heal pool
+		this.healPool = new BukkitRunnable() {
+			@Override
+			public void run() {
+				for(BedwarsPlayer bwPlayer : bwPlayers) {
+					if(bwPlayer.insideBase()) {
+						bwPlayer.getPlayer().addPotionEffect(
+								new PotionEffect(
+										PotionEffectType.REGENERATION, Integer.MAX_VALUE, healPoolLevel - 1));
+					} else {
+						bwPlayer.getPlayer().removePotionEffect(PotionEffectType.REGENERATION);
+					}
+				}
+			}
+		}.runTaskTimer(this.plugin, 20, 20);
+	}
+	
+	public void stopHealPool() {
+		if(this.healPool == null) {
+			return;
+		}
+		
+		this.healPool.cancel();
 	}
 	
 	// TODO: Perform this in BedwarsPlayer class
@@ -281,6 +341,7 @@ public class BedwarsTeam implements Listener {
 		player.getInventory().clear();
 		this.game.getBedwarsPlayer(player).setPlayerArmor();
 		this.game.getBedwarsPlayer(player).setPlayerStarterMaterials();
+		this.setHasteLevel(this.hasteLevel); // Make sure new player gets haste upgrade applied
 	}
 	
 	public boolean hasPlayer(Player player) {
@@ -378,5 +439,5 @@ public class BedwarsTeam implements Listener {
 			// Players open the same instance of the team shop
 			this.game.getTeam(p).teamShop.openInventory((HumanEntity)p);
 		}
-	}
+	}	
 }

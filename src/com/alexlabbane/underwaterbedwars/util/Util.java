@@ -16,7 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import net.minecraft.server.v1_16_R2.NBTTagCompound;
 
 public class Util {
-	static Plugin plugin;
+	public static Plugin plugin;
 	
 	public static void setPlugin(Plugin p) {
 		plugin = p;

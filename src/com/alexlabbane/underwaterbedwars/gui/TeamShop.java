@@ -95,7 +95,25 @@ public class TeamShop extends Shop implements Listener {
 		default:
 		}
 		
-		this.inv.setItem(13, this.createTeamShopItem("FURNACE", 1, "Forge Upgrade (2 Diamonds)", "FORGE", 2, "DIAMOND"));
+		final int curForgeLevel = (team != null ? team.getForgeLevel() : 0);
+		
+		switch(curForgeLevel) {
+		case 0:
+			this.inv.setItem(13, this.createTeamShopItem("FURNACE", curForgeLevel+1, "Iron Forge (2 Diamonds)", "FORGE", 2, "DIAMOND"));
+			break;
+		case 1:
+			this.inv.setItem(13, this.createTeamShopItem("FURNACE", curForgeLevel+1, "Gold Forge (4 Diamonds)", "FORGE", 4, "DIAMOND"));
+			break;
+		case 2:
+			this.inv.setItem(13, this.createTeamShopItem("FURNACE", curForgeLevel+1, "Spawn Emerald (6 Diamonds)", "FORGE", 6, "DIAMOND"));
+			break;
+		case 3:
+			this.inv.setItem(13, this.createTeamShopItem("FURNACE", curForgeLevel+1, "Molten Forge (8 Diamonds)", "FORGE", 8, "DIAMOND"));
+			break;
+		default:
+			this.inv.setItem(13, this.createTeamShopItem("FURNACE", 4, "Molten Forge (8 Diamonds)", "FORGE", 8, "DIAMOND"));
+		}
+		
 		this.inv.setItem(14, this.createTeamShopItem("BEACON", 1, "Heal Pool (1 Diamond)", "HEAL_POOL", 1, "DIAMOND"));
 		
 		this.inv.setItem(15, this.createShopLink("LEATHER", 1, ChatColor.YELLOW + "Buy a trap", "SHOP_TRAP", teamColor));
@@ -208,6 +226,7 @@ public class TeamShop extends Shop implements Listener {
 			if(currentForge < 4) {
 				shopItem.playerPay(player);
 				team.setForgeLevel(currentForge + 1);
+				team.initializeGen();
 			} else {
 				player.sendMessage(ChatColor.RED + "You already have maximum forge!");
 			}
@@ -218,6 +237,7 @@ public class TeamShop extends Shop implements Listener {
 			if(currentHealPoolLevel < 1) {
 				shopItem.playerPay(player);
 				team.setHealPoolLevel(currentHealPoolLevel + 1);
+				team.startHealPool();
 			} else {
 				player.sendMessage(ChatColor.RED + "You already have heal pool!");
 			}

@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffectType;
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
+import com.alexlabbane.underwaterbedwars.util.Util;
 import com.mojang.datafixers.util.Pair;
 
 /**
@@ -364,5 +365,16 @@ public class BedwarsPlayer {
 			// If no pickaxe previously in inventory, add one to it
 			inv.addItem(BedwarsTools.Shears.getBedwarsTool(this.shears));
 		}
+	}
+
+	public boolean insideBase() {
+		double playerX = this.getPlayer().getLocation().getX();
+		double playerZ = this.getPlayer().getLocation().getZ();
+		double xMin = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.x-min");
+		double xMax = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.x-max");
+		double zMin = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.z-min");
+		double zMax = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.z-max");
+		
+		return (playerX >= xMin && playerX <= xMax && playerZ >= zMin && playerZ <= zMax);
 	}
 }
