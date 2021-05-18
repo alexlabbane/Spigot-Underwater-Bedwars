@@ -2,7 +2,7 @@ package com.alexlabbane.underwaterbedwars.util;
 
 public class TrapQueue {
 	// Constants
-	private static final int MAX_NUM_TRAPS = 3;
+	public static final int MAX_NUM_TRAPS = 3;
 	
 	// Data members
 	private TeamTrap[] queue;

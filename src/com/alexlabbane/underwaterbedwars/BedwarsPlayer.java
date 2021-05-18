@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
@@ -194,8 +197,38 @@ public class BedwarsPlayer {
 		ItemStack shears = new ItemStack(Material.SHEARS);
 		if(this.shears == BedwarsTools.Shears.SHEARS)
 			inv.addItem(shears);
+		
+		this.applyImpalingEffect();
 	}
 	
+	/**
+	 * Apply haste effect to player based on team upgrade
+	 */
+	public void setPlayerHaste() {
+		if(this.team == null) return;
+		
+		if(this.team.getHasteLevel() > 0) {
+			this.player.addPotionEffect(
+					new PotionEffect(
+							PotionEffectType.FAST_DIGGING, 
+							Integer.MAX_VALUE, 
+							this.team.getHasteLevel() - 1));
+		}
+	}
+	
+	/**
+	 * Apply impaling to any tridents the player is holding
+	 */
+	public void applyImpalingEffect() {
+		Inventory playerInv = this.player.getInventory();
+		for(int i = 0; i < playerInv.getSize(); i++) {
+			ItemStack itemStack = playerInv.getItem(i);
+			if(itemStack == null) continue;
+			
+			if(itemStack.getType() == Material.TRIDENT && this.team.getImpalingLevel() > 0)
+				itemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, this.team.getImpalingLevel());
+		}
+	}
 	
 	/**
 	 * Upgrade the pickaxe of a Bedwars Player

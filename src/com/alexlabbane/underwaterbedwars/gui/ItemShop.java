@@ -14,6 +14,7 @@ import org.bukkit.potion.PotionEffect;
 
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.BedwarsPlayer;
+import com.alexlabbane.underwaterbedwars.BedwarsTeam;
 import com.alexlabbane.underwaterbedwars.shoputil.ShopItem;
 import com.alexlabbane.underwaterbedwars.shoputil.ShopPotion;
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
@@ -57,6 +58,21 @@ public class ItemShop extends Shop implements Listener {
 	
 	@Override
 	public void initializeItems(Player player) {
+		BedwarsTeam team = this.bedwarsGame.getTeam(player);
+		LeveledEnchantment[] trident2Enchants = null;
+		LeveledEnchantment[] trident3Enchants = null;
+		if(team != null && team.getImpalingLevel() > 0) {
+			trident2Enchants = new LeveledEnchantment[]{
+					new LeveledEnchantment(Enchantment.LOYALTY, 2),
+					new LeveledEnchantment(Enchantment.DAMAGE_ALL, team.getImpalingLevel())};
+			trident3Enchants = new LeveledEnchantment[]{
+					new LeveledEnchantment(Enchantment.LOYALTY, 3),
+					new LeveledEnchantment(Enchantment.DAMAGE_ALL, team.getImpalingLevel())};
+		} else {
+			trident2Enchants = new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 2)};
+			trident3Enchants = new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 3)};
+		}
+		
 		// Create links to other shop pages
 		this.inv.setItem(0, this.createShopLink("NETHER_STAR", 1, "Quick Buy", "SHOP_QUICK_BUY", this.color));
 		this.inv.setItem(1, this.createShopLink("TERRACOTTA", 1, "Blocks", "SHOP_BLOCKS", this.color));
@@ -69,7 +85,7 @@ public class ItemShop extends Shop implements Listener {
 		
 		// Add items for purchase to shop
 		this.inv.setItem(19, this.createShopItem(this.color.toUpperCase() + "_WOOL", 16, "Buy Wool (4 iron)", 4, "IRON_INGOT"));
-		this.inv.setItem(20, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident II (10 iron)", 10, "IRON_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 2)}));
+		this.inv.setItem(20, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident II (10 iron)", 10, "IRON_INGOT", trident2Enchants));
 		this.inv.setItem(21, this.createSpecialShopItem("SPECIAL_CHAINMAIL_BOOTS", 1, "Buy Chain Armor (40 iron)", 40, "IRON_INGOT")); // TODO: Add rest of items (iron armor, tools, etc)
 		
 		// Tools upgrades
@@ -96,7 +112,7 @@ public class ItemShop extends Shop implements Listener {
 		this.inv.setItem(25, this.createShopItem("TNT", 1, "Buy TNT (4 gold)", 4, "GOLD_INGOT"));
 		
 		this.inv.setItem(28, this.createShopItem("OAK_PLANKS", 16, "Buy Wood (4 gold)", 4, "GOLD_INGOT"));
-		this.inv.setItem(29, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident III (7 gold)", 7, "GOLD_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 3)}));
+		this.inv.setItem(29, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident III (7 gold)", 7, "GOLD_INGOT", trident3Enchants));
 		this.inv.setItem(30, this.createSpecialShopItem("SPECIAL_IRON_BOOTS", 1, "Buy Iron Armor (12 gold)", 12, "GOLD_INGOT")); // TODO: Add rest of items (iron armor, tools, etc)
 		this.inv.setItem(31, this.createSpecialShopItem("SPECIAL_SHEARS", 1, "Buy Shears (20 iron)", 20, "IRON_INGOT"));
 		this.inv.setItem(32, this.createShopItem("ARROW", 8, "Buy Arrows (2 gold)", 2, "GOLD_INGOT"));

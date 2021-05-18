@@ -13,6 +13,7 @@ import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.BedwarsTeam;
 import com.alexlabbane.underwaterbedwars.shoputil.ShopItem;
 import com.alexlabbane.underwaterbedwars.util.TeamUpgrade;
+import com.alexlabbane.underwaterbedwars.util.TrapQueue;
 import com.alexlabbane.underwaterbedwars.util.Util;
 
 import net.md_5.bungee.api.ChatColor;
@@ -47,12 +48,20 @@ public class TeamShop extends Shop implements Listener {
 		String teamColor = "WHITE";
 		if(team != null) teamColor = team.getColor().name();
 		
+		final int nextImpalingLevel = (team != null ? Math.min(team.getImpalingLevel() + 1, 4) : 1);
+		final int curImpalingLevel = (team != null ? team.getImpalingLevel() : 0);
+		
+		switch(curImpalingLevel) {
+		case 0:
+			this.inv.setItem(10, this.createTeamShopItem("IRON_SWORD", nextImpalingLevel, "Sharpness (4 Diamonds)", "IMPALING", 4, "DIAMOND"));
+			break;
+		default:
+			this.inv.setItem(10, this.createTeamShopItem("IRON_SWORD", nextImpalingLevel, "Sharpness (4 Diamonds)", "IMPALING", 4, "DIAMOND"));
+		}
+		
 		final int nextProtLevel = (team != null ? Math.min(team.getProtLevel() + 1, 4) : 1);
 		final int curProtLevel = (team != null ? team.getProtLevel() : 0);
-		
-		// TODO Auto-generated method stub
-		this.inv.setItem(10, this.createTeamShopItem("IRON_SWORD", 1, "Impaling (4 Diamonds)", "IMPALING", 4, "DIAMOND"));
-		
+				
 		switch(curProtLevel) {
 		case 0:
 			this.inv.setItem(11, this.createTeamShopItem("IRON_CHESTPLATE", nextProtLevel, "Protection " + nextProtLevel + " (2 Diamonds)", "PROTECTION", 2, "DIAMOND"));
@@ -70,11 +79,47 @@ public class TeamShop extends Shop implements Listener {
 			this.inv.setItem(11, this.createTeamShopItem("IRON_CHESTPLATE", nextProtLevel, "Protection " + nextProtLevel + " (16 Diamonds)", "PROTECTION", 16, "DIAMOND"));
 		}
 		
-		this.inv.setItem(12, this.createTeamShopItem("GOLDEN_PICKAXE", 1, "Haste (2 Diamonds)", "HASTE", 2, "DIAMOND"));
+		final int nextHasteLevel = (team != null ? Math.min(team.getHasteLevel() + 1, 2) : 1);
+		final int curHasteLevel = (team != null ? team.getHasteLevel() : 0);
+		
+		switch(curHasteLevel) {
+		case 0:
+			this.inv.setItem(12, this.createTeamShopItem("GOLDEN_PICKAXE", nextHasteLevel, "Haste " + nextHasteLevel + " (2 Diamonds)", "HASTE", 2, "DIAMOND"));
+			break;
+		case 1:
+			this.inv.setItem(12, this.createTeamShopItem("GOLDEN_PICKAXE", nextHasteLevel, "Haste " + nextHasteLevel + " (4 Diamonds)", "HASTE", 4, "DIAMOND"));
+			break;
+		case 2:
+			this.inv.setItem(12, this.createTeamShopItem("GOLDEN_PICKAXE", nextHasteLevel, "Haste " + nextHasteLevel + " (4 Diamonds)", "HASTE", 4, "DIAMOND"));
+			break;
+		default:
+		}
+		
 		this.inv.setItem(13, this.createTeamShopItem("FURNACE", 1, "Forge Upgrade (2 Diamonds)", "FORGE", 2, "DIAMOND"));
 		this.inv.setItem(14, this.createTeamShopItem("BEACON", 1, "Heal Pool (1 Diamond)", "HEAL_POOL", 1, "DIAMOND"));
 		
 		this.inv.setItem(15, this.createShopLink("LEATHER", 1, ChatColor.YELLOW + "Buy a trap", "SHOP_TRAP", teamColor));
+	
+		final int trapStart = 30;
+		for(int i = 0; i < TrapQueue.MAX_NUM_TRAPS; i++) {
+			ItemStack trapDisplay = new ItemStack(Material.GRAY_STAINED_GLASS);
+			ItemMeta meta = trapDisplay.getItemMeta();
+			meta.setDisplayName("No trap queued");
+			trapDisplay.setItemMeta(meta);
+			
+			if(team != null && i < team.getQueuedTraps().size()) { // If a trap is queued, place it in the display
+				trapDisplay = this.createTeamShopItem(
+						team.getQueuedTraps().getAtPosition(i).getDisplayMaterial().name(), 
+						1, 
+						"Trap #" + (i+1) + ": " + team.getQueuedTraps().getAtPosition(i).getName(), 
+						"", // Leave upgrade name empty so that nothing happens on purchase 
+						0, // Pay amount 0
+						Material.IRON_INGOT.name());
+			}
+			
+			this.inv.setItem(i + trapStart, trapDisplay);
+		}
+
 	}
 
 	@Override
@@ -85,7 +130,7 @@ public class TeamShop extends Shop implements Listener {
 			if(shopItem.canPlayerAfford(player)) {
 				TeamUpgrade upgradeType = TeamUpgrade.getByName(shopItem.getMatName());
 				this.handleTeamUpgrade(player, shopItem, upgradeType);
-			} else {
+			} else if(shopItem.getPayAmount() > 0) {
 				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 				player.sendMessage(ChatColor.RED + "You can't afford this upgrade!");
 			}
@@ -128,6 +173,16 @@ public class TeamShop extends Shop implements Listener {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
 
 		switch(upgradeType) {
+		case IMPALING:
+			final int currentImpaling = team.getImpalingLevel();
+			if(currentImpaling < 1) {
+				shopItem.playerPay(player);
+				team.setImpalingLevel(currentImpaling + 1);
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have impaling!");
+			}
+			
+			break;
 		case PROTECTION:
 			final int currentProt = team.getProtLevel();
 			if(currentProt < 4) {
@@ -138,6 +193,36 @@ public class TeamShop extends Shop implements Listener {
 			}
 			
 			break;
-		}		
+		case HASTE:
+			final int currentHaste = team.getHasteLevel();
+			if(currentHaste < 2) {
+				shopItem.playerPay(player);
+				team.setHasteLevel(currentHaste + 1);
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have maximum haste!");
+			}
+		
+			break;
+		case FORGE:
+			final int currentForge = team.getForgeLevel();
+			if(currentForge < 4) {
+				shopItem.playerPay(player);
+				team.setForgeLevel(currentForge + 1);
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have maximum forge!");
+			}
+			
+			break;
+		case HEAL_POOL:
+			final int currentHealPoolLevel = team.getHealPoolLevel();
+			if(currentHealPoolLevel < 1) {
+				shopItem.playerPay(player);
+				team.setHealPoolLevel(currentHealPoolLevel + 1);
+			} else {
+				player.sendMessage(ChatColor.RED + "You already have heal pool!");
+			}
+			
+			break;
+		}
 	}
 }

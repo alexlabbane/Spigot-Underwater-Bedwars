@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
+import com.alexlabbane.underwaterbedwars.BedwarsTeam;
 import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 
@@ -16,6 +17,26 @@ public class MeleeShop extends ItemShop implements Listener {
 
 	@Override
 	public void initializeItems(Player player) {
+		BedwarsTeam team = this.bedwarsGame.getTeam(player);
+		LeveledEnchantment[] trident2Enchants = null;
+		LeveledEnchantment[] trident3Enchants = null;
+		LeveledEnchantment[] trident4Enchants = null;
+		if(team != null && team.getImpalingLevel() > 0) {
+			trident2Enchants = new LeveledEnchantment[]{
+					new LeveledEnchantment(Enchantment.LOYALTY, 2),
+					new LeveledEnchantment(Enchantment.DAMAGE_ALL, team.getImpalingLevel())};
+			trident3Enchants = new LeveledEnchantment[]{
+					new LeveledEnchantment(Enchantment.LOYALTY, 3),
+					new LeveledEnchantment(Enchantment.DAMAGE_ALL, team.getImpalingLevel())};
+			trident4Enchants = new LeveledEnchantment[]{
+					new LeveledEnchantment(Enchantment.RIPTIDE, 2),
+					new LeveledEnchantment(Enchantment.DAMAGE_ALL, team.getImpalingLevel())};
+		} else {
+			trident2Enchants = new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 2)};
+			trident3Enchants = new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 3)};
+			trident4Enchants = new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.RIPTIDE, 2)};
+		}
+		
 		// Create links to other shop pages
 		this.inv.setItem(0, this.createShopLink("NETHER_STAR", 1, "Quick Buy", "SHOP_QUICK_BUY", this.color));
 		this.inv.setItem(1, this.createShopLink("TERRACOTTA", 1, "Blocks", "SHOP_BLOCKS", this.color));
@@ -27,9 +48,9 @@ public class MeleeShop extends ItemShop implements Listener {
 		this.inv.setItem(7, this.createShopLink("TNT", 1, "Utilities", "SHOP_UTILITIES", this.color));
 		
 		// Add blocks for purchase to shop
-		this.inv.setItem(19, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident II (10 iron)", 10, "IRON_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 2)}));
-		this.inv.setItem(20, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident III (7 gold)", 7, "GOLD_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.LOYALTY, 3)}));
-		this.inv.setItem(21, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident IV (4 emerald)", 4, "EMERALD", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.RIPTIDE, 2)}));
+		this.inv.setItem(19, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident II (10 iron)", 10, "IRON_INGOT", trident2Enchants));
+		this.inv.setItem(20, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident III (7 gold)", 7, "GOLD_INGOT", trident3Enchants));
+		this.inv.setItem(21, this.createEnchantedShopItem("TRIDENT", 1, "Buy Trident IV (4 emerald)", 4, "EMERALD", trident4Enchants));
 		this.inv.setItem(22, this.createEnchantedShopItem("STICK", 1, "Buy Knockback Stick (5 gold)", 5, "GOLD_INGOT", new LeveledEnchantment[]{new LeveledEnchantment(Enchantment.KNOCKBACK, 2)}));
 	}
 }

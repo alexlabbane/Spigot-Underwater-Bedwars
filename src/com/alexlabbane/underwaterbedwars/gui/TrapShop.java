@@ -76,5 +76,6 @@ public class TrapShop extends TeamShop {
 		shopItem.playerPay(player);
 		
 		this.initializeItems(player);
+		team.getTeamShop().initializeItems(player);
 	}
 }

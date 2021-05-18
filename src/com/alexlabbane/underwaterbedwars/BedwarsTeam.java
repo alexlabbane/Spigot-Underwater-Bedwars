@@ -157,8 +157,28 @@ public class BedwarsTeam implements Listener {
 	public TeamShop getTeamShop() { return this.teamShop; }
 	public TrapShop getTrapShop() { return this.trapShop; }
 	
-	public void setImpalingLevel(int level) { this.impalingLevel = level; }
+	public void setImpalingLevel(int level) { 
+		this.impalingLevel = level; 
+		
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			bwPlayer.applyImpalingEffect();
+	}
 	public int getImpalingLevel() { return this.impalingLevel; }
+	
+	public void setHasteLevel(int level) { 
+		this.hasteLevel = level; 
+		
+		// Update player haste
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			bwPlayer.setPlayerHaste();
+	}
+	public int getHasteLevel() { return this.hasteLevel; }
+	
+	public void setForgeLevel(int level) { this.forgeLevel = level; }
+	public int getForgeLevel() { return this.forgeLevel; }
+	
+	public void setHealPoolLevel(int level) { this.healPoolLevel = level; }
+	public int getHealPoolLevel() { return this.healPoolLevel; }
 	
 	public void setProtectionLevel(int level) { 
 		this.protLevel = level;
@@ -318,6 +338,7 @@ public class BedwarsTeam implements Listener {
 					p.setGameMode(GameMode.SURVIVAL);
 					bwPlayer.setPlayerArmor();
 					bwPlayer.setPlayerStarterMaterials();
+					bwPlayer.setPlayerHaste();
 				}
 			}.runTaskLater(this.plugin, 20 * 5);			
 		}
