@@ -115,6 +115,9 @@ public class BedwarsPlayer {
 			finishedArmor.get(2).addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protLevel);
 		}
 		
+		// Add depth strider 3 to boots
+		finishedArmor.get(0).addEnchantment(Enchantment.DEPTH_STRIDER, 3);
+		
 		// Dye to match color
 		for(ItemStack armor : finishedArmor) {
 			ItemMeta meta = armor.getItemMeta();
