@@ -19,6 +19,7 @@ public class BedwarsBed implements Listener {
 	private Location footLocation;
 	private BlockFace facing;
 	private TeamColor bedColor;
+	private boolean broken;
 	
 	public BedwarsBed(String bedColor) {
 		this(TeamColor.valueOf(bedColor));
@@ -44,6 +45,8 @@ public class BedwarsBed implements Listener {
 	}
 	
 	public void set() {
+		this.broken = false;
+		
 		Block start = this.headLocation.getBlock();
 		Material mat = Material.getMaterial(this.bedColor.getColor() + "_BED");
 		
@@ -64,7 +67,7 @@ public class BedwarsBed implements Listener {
 	public void onBedBreak(BlockBreakEvent e) {
 		if(e.getBlock().equals(this.headLocation.getBlock())
 				|| e.getBlock().equals(this.footLocation.getBlock())) {
-			Bukkit.broadcastMessage(this.bedColor.getColor() + " bed broken");
+			this.broken = true;
 			e.setDropItems(false);
 		}	
 	}

@@ -73,8 +73,10 @@ public class BedwarsTeam implements Listener {
 	private BukkitTask genSpawner;
 	private Location genLocation;
 
+	// Team bed
+	private BedwarsBed bed;
+	
 	// Other important locations
-	private Location bedLocation;
 	private Location chestLocation;
 	private Location enderChestLocation;
 	
@@ -100,6 +102,9 @@ public class BedwarsTeam implements Listener {
 		this.healPoolLevel = 0;
 		this.traps = new TrapQueue();
 		this.healPool = null;
+		
+		// Initialize bed
+		this.bed = new BedwarsBed(this.teamColor);
 		
 		// Initialize item shop
 		this.itemShop = new ItemShop(color, game);
