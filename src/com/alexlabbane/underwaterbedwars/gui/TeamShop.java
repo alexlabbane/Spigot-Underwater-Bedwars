@@ -245,4 +245,13 @@ public class TeamShop extends Shop implements Listener {
 			break;
 		}
 	}
+	
+	@Override
+	public void openInventory(final HumanEntity ent) {
+		if(ent instanceof Player) {
+			this.initializeItems((Player)ent);
+		}
+		
+		ent.openInventory(this.inv);
+	}
 }

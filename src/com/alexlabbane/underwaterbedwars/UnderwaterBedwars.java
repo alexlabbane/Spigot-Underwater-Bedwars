@@ -25,7 +25,7 @@ import com.alexlabbane.underwaterbedwars.util.Util;
 public class UnderwaterBedwars extends JavaPlugin implements Listener {
 	
 	private static ItemShop testShop;
-	private static BedwarsGame game;
+	public static BedwarsGame game;
 	
     // Fired when plugin is first enabled
     @Override

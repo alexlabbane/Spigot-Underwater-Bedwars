@@ -104,7 +104,7 @@ public class BedwarsTeam implements Listener {
 		this.healPool = null;
 		
 		// Initialize bed
-		this.bed = new BedwarsBed(this.teamColor);
+		this.bed = new BedwarsBed(this.teamColor, this);
 		
 		// Initialize item shop
 		this.itemShop = new ItemShop(color, game);

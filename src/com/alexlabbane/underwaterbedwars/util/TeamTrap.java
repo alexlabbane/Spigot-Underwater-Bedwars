@@ -2,6 +2,9 @@ package com.alexlabbane.underwaterbedwars.util;
 
 import org.bukkit.Material;
 
+import com.alexlabbane.underwaterbedwars.BedwarsPlayer;
+import com.alexlabbane.underwaterbedwars.BedwarsTeam;
+
 public enum TeamTrap {
 	BLINDNESS_SLOWNESS,
 	COUNTER_OFFENSIVE,
@@ -51,5 +54,15 @@ public enum TeamTrap {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Apply the trap effects to the relevant players
+	 * Warn defenders that a trap has been triggered
+	 * @param defenders
+	 * @param offender
+	 */
+	public void apply(BedwarsTeam defenders, BedwarsPlayer offender) {
+		
 	}
 }
