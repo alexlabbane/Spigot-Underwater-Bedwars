@@ -20,6 +20,11 @@ blue-team:
     z: 14.448
     pitch: 0
     yaw: 179.9
+  bed-location:
+    x: 7.5
+    y: 43.5
+    z: 9.5
+    facing: EAST
     
 pink-team:
   item-shop-location:

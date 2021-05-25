@@ -52,6 +52,8 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	getServer().getPluginManager().registerEvents(new PlayerItemDamageListener(), this);
     	getServer().getPluginManager().registerEvents(new PlayerMoveArmorListener(), this);
     	getServer().getPluginManager().registerEvents(testShop, this);
+    	
+    	BedwarsBed testBed = new BedwarsBed(TeamColor.BLUE);
     }
     // Fired when plugin is disabled
     @Override
