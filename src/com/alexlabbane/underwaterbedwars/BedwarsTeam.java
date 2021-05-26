@@ -165,6 +165,7 @@ public class BedwarsTeam implements Listener {
 	public TrapQueue getQueuedTraps() { return this.traps; }
 	public TeamShop getTeamShop() { return this.teamShop; }
 	public TrapShop getTrapShop() { return this.trapShop; }
+	public BedwarsBed getBed() { return this.bed; }
 	
 	public void setImpalingLevel(int level) { 
 		this.impalingLevel = level; 

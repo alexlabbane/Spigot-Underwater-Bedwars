@@ -1,6 +1,6 @@
 package com.alexlabbane.underwaterbedwars;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 import java.util.Queue;
 
 import org.bukkit.Bukkit;
@@ -30,7 +30,8 @@ public class BedwarsBed implements Listener {
 	private BedwarsTeam team; // Team the bed belongs to
 	private Queue<BedwarsPlayer> trappedPlayers;
 	
-	private static int trapCooldown = 20 * 30; // 30 second cooldown for traps (per player)
+	private static int TRAP_COOLDOWN = 20 * 30; // 30 second cooldown for traps (per player)
+	private static int TRAP_RADIUS_SQUARED = 6 * 6; // trigger traps in 6 block radius 
 	
 	public BedwarsBed(String bedColor, BedwarsTeam team) {
 		this(TeamColor.valueOf(bedColor), team);
@@ -41,7 +42,7 @@ public class BedwarsBed implements Listener {
 		String lowerColor = bedColor.getColor().toLowerCase();
 		
 		this.team = team;
-		this.trappedPlayers = new LinkedList<BedwarsPlayer>();
+		this.trappedPlayers = new ArrayDeque<BedwarsPlayer>();
 		this.headLocation = new Location(
 				Bukkit.getServer().getWorlds().get(0), // Overworld
 				config.getDouble(lowerColor + "-team.bed-location.x"),
@@ -56,6 +57,10 @@ public class BedwarsBed implements Listener {
 		
 		Bukkit.getServer().getPluginManager().registerEvents(this, Util.plugin);
 	}
+	
+	public Location getHeadLocation() { return this.headLocation; }
+	public Location getFootLocation() { return this.footLocation; }
+	public boolean isBroken() { return this.broken; }
 	
 	public void set() {
 		this.broken = false;
@@ -87,7 +92,8 @@ public class BedwarsBed implements Listener {
 	
 	@EventHandler
 	public void onPlayerEnterTrapRange(PlayerMoveEvent e) {
-		if(this.broken)
+		// Check if bed is broken; make sure player within specified block radius
+		if(this.broken || e.getPlayer().getLocation().distanceSquared(this.headLocation) > BedwarsBed.TRAP_RADIUS_SQUARED)
 			return;
 		
 		BedwarsPlayer bwPlayer = UnderwaterBedwars.game.getBedwarsPlayer(e.getPlayer());
@@ -103,9 +109,7 @@ public class BedwarsBed implements Listener {
 			if(this.team != null && this.team.getQueuedTraps().size() > 0) {
 				// There is a queued trap, so we apply it
 				TeamTrap trap = this.team.getQueuedTraps().pop();
-				trap.apply(this.team, bwPlayer);
-				
-				bwPlayer.getPlayer().sendMessage("Applying trap " + trap.getName());
+				trap.apply(this.team, bwPlayer);				
 				
 				// Add bwPlayer to queue of trapped players
 				this.trappedPlayers.add(bwPlayer);
@@ -116,7 +120,7 @@ public class BedwarsBed implements Listener {
 					public void run() {
 						trappedPlayers.remove();
 					}
-				}.runTaskLater(Util.plugin, BedwarsBed.trapCooldown);
+				}.runTaskLater(Util.plugin, BedwarsBed.TRAP_COOLDOWN);
 			}
 		}
 	}
