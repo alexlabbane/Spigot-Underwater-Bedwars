@@ -39,6 +39,12 @@ public class GameGen {
 	
 	public GameGen(String genName) {
 		this.genName = genName;
+		
+		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
+		this.holoText.setCustomName(" ");
+		this.holoText.setVisible(false);
+		this.holoText.setCustomNameVisible(true);
+		
 		this.configureGen();
 	}
 	
@@ -49,6 +55,11 @@ public class GameGen {
 		this.maxStackSize = maxStackSize;
 		this.genLevel = -1; // Gens instantiated this way cannot have level upgrades
 		this.genTask = null;
+		
+		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
+		this.holoText.setCustomName(" ");
+		this.holoText.setVisible(false);
+		this.holoText.setCustomNameVisible(true);
 		
 		this.initialize();
 	}
@@ -90,12 +101,7 @@ public class GameGen {
 }
 	
 	public void initialize() {
-		this.stopGen();
-		
-		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
-		this.holoText.setCustomName(" ");
-		this.holoText.setVisible(false);
-		this.holoText.setCustomNameVisible(true);
+		this.stopGen();		
 		
 		this.genTask = new BukkitRunnable() {
 			int tickCounter = 0;
