@@ -40,7 +40,8 @@ public class GameGen {
 	public GameGen(String genName) {
 		this.genName = genName;		
 		this.holoText = null;
-		
+		this.genTask = null;
+
 		this.configureGen();
 	}
 	
@@ -90,9 +91,7 @@ public class GameGen {
 		this.material = genMat;
 		this.delay = delay;
 		this.maxStackSize = maxStackSize;
-		this.genLevel = 0;
-		this.genTask = null;
-		
+		this.genLevel = 0;		
 		
 		if(this.holoText == null)
 			this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
@@ -106,10 +105,10 @@ public class GameGen {
 	
 	public void initialize() {
 		this.stopGen();		
-		
+
 		this.genTask = new BukkitRunnable() {
 			int tickCounter = 0;
-			
+
 			@Override
 			public void run() {
 				tickCounter += Util.TICKS_PER_SECOND;
