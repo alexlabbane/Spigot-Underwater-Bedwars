@@ -38,13 +38,7 @@ public class GameGen {
 	public static final float GEN_RADIUS = 1.5f;
 	
 	public GameGen(String genName) {
-		this.genName = genName;
-		
-		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
-		this.holoText.setCustomName(" ");
-		this.holoText.setVisible(false);
-		this.holoText.setCustomNameVisible(true);
-		
+		this.genName = genName;		
 		this.configureGen();
 	}
 	
@@ -96,6 +90,11 @@ public class GameGen {
 		this.maxStackSize = maxStackSize;
 		this.genLevel = 0;
 		this.genTask = null;
+		
+		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
+		this.holoText.setCustomName(" ");
+		this.holoText.setVisible(false);
+		this.holoText.setCustomNameVisible(true);
 		
 		this.initialize();	
 }
