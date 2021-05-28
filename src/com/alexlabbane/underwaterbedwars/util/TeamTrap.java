@@ -19,10 +19,10 @@ public enum TeamTrap {
 	ALARM,
 	MINER_FATIGUE;
 	
-	private static final int SLOWNESS_LEVEL = 2;
+	private static final int SLOWNESS_LEVEL = 1;
 	private static final int SLOWNESS_DURATION = 20 * 8;
 	
-	private static final int BLINDNESS_LEVEL = 1;
+	private static final int BLINDNESS_LEVEL = 0;
 	private static final int BLINDNESS_DURATION = 20 * 8;
 	
 	private static final int COUNTER_OFFENSIVE_RADIUS_SQUARED = 10 * 10;
@@ -86,7 +86,7 @@ public enum TeamTrap {
 	 */
 	public void apply(BedwarsTeam defenders, BedwarsPlayer offender) {
 		for(BedwarsPlayer bwPlayer : defenders.getBedwarsPlayers()) {
-			bwPlayer.getPlayer().sendTitle(ChatColor.RED + this.getName() + " triggered!", "", 0, 20 * 3, 0);
+			bwPlayer.getPlayer().sendTitle("", ChatColor.RED + this.getName() + " triggered!", 0, 20 * 3, 0);
 			
 			// Play the alarm noise
 			new BukkitRunnable() {

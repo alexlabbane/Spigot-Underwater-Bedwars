@@ -236,6 +236,7 @@ public class BedwarsTeam implements Listener {
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_HELMET, new LeveledEnchantment[] { new LeveledEnchantment(Enchantment.WATER_WORKER, 1)} )); // helmet always index 3
 	}
 	
+	// TODO: Transfer team gens to use GameGen class
 	public void initializeGen() {
 		if(this.genSpawner != null)
 			this.genSpawner.cancel();		

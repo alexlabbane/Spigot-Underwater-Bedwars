@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -86,10 +87,21 @@ public class BedwarsBed implements Listener {
 		if(e.getBlock().equals(this.headLocation.getBlock())
 				|| e.getBlock().equals(this.footLocation.getBlock())) {
 			this.broken = true;
+			
+			// Update scoreboard for all players with new bed break
+			UnderwaterBedwars.game.updateScoreboards();
 			e.setDropItems(false);
 		}	
 	}
 	
+	@EventHandler
+	public void onSleep(PlayerBedEnterEvent e) {
+		if(e.getBed() == this.headLocation.getBlock()
+			|| e.getBed() == this.footLocation.getBlock()) {
+			e.setCancelled(true);
+		}
+	}
+		
 	@EventHandler
 	public void onPlayerEnterTrapRange(PlayerMoveEvent e) {
 		// Check if bed is broken; make sure player within specified block radius

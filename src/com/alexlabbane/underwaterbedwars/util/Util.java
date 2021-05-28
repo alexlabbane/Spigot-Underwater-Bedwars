@@ -17,6 +17,7 @@ import net.minecraft.server.v1_16_R2.NBTTagCompound;
 
 public class Util {
 	public static Plugin plugin;
+	public static final int TICKS_PER_SECOND = 20;
 	
 	public static void setPlugin(Plugin p) {
 		plugin = p;

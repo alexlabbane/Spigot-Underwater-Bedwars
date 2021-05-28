@@ -1,3 +1,58 @@
+game:
+  game-level:
+    level-1:
+      delay-ticks: 6000
+      tier: Diamond II
+    level-2:
+      delay-ticks: 7200
+      tier: Emerald II
+    level-3:
+      delay-ticks: 7200
+      tier: Diamond III
+    level-4:
+      delay-ticks: 7200
+      tier: Emerald III
+    level-5:
+      delay-ticks: 7200
+      tier: Beds gone
+    level-6:
+      delay-ticks: 12000
+      tier: Sudden death
+    level-7:
+      delay-ticks: 12000
+      tier: Draw
+  gens:
+    gen_1:
+      x: 1.5
+      y: 44.5
+      z: -46.5
+      material: DIAMOND
+      max-stack-size: 4
+      level-0-delay-ticks: 600
+      level-1-delay-ticks: 460
+      level-2-delay-ticks: 460
+      level-3-delay-ticks: 300
+      level-4-delay-ticks: 300
+      level-5-delay-ticks: 300
+      level-6-delay-ticks: 300
+      level-7-delay-ticks: 300
+    gen_2:
+      x: 80
+      y: 57.5
+      z: 32
+      material: EMERALD
+      delay-ticks: 1200
+      max-stack-size: 4
+      level-0-delay-ticks: 1200
+      level-1-delay-ticks: 1200
+      level-2-delay-ticks: 900
+      level-3-delay-ticks: 900
+      level-4-delay-ticks: 600
+      level-5-delay-ticks: 600
+      level-6-delay-ticks: 600
+      level-7-delay-ticks: 600
+
+
 blue-team:
   base-bounds:
     x-min: -14

@@ -1,7 +1,10 @@
 package com.alexlabbane.underwaterbedwars;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -12,12 +15,18 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
 
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.Util;
 import com.mojang.datafixers.util.Pair;
+
+import net.md_5.bungee.api.ChatColor;
 
 /**
  * Class to wrap Player objects with additional bedwars game state information
@@ -35,6 +44,8 @@ public class BedwarsPlayer {
 	private BedwarsTools.Pickaxe pickaxe;
 	private BedwarsTools.Shears shears;
 	
+	private Scoreboard scoreboard;
+	
 	/**
 	 * Construct a new Bedwars Player attached to player p
 	 * Starts players with no tools and base armor
@@ -47,6 +58,8 @@ public class BedwarsPlayer {
 		this.axe = BedwarsTools.Axe.NONE;
 		this.pickaxe = BedwarsTools.Pickaxe.NONE;
 		this.shears = BedwarsTools.Shears.NONE;
+		
+		this.updateScoreboard();
 	}
 	
 	public Player getPlayer() { return this.player; }
@@ -370,6 +383,75 @@ public class BedwarsPlayer {
 		}
 	}
 
+	/**
+	 * Redraw the scoreboard for the player
+	 */
+	public void updateScoreboard() {
+		this.scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+		Objective obj = this.scoreboard.registerNewObjective(
+				"Bedwars",
+				"Criteria", 
+				ChatColor.YELLOW + ChatColor.BOLD.toString() + "BED WARS");
+		
+		obj.setDisplaySlot(DisplaySlot.SIDEBAR);
+		
+		Date currentDate = new Date();
+		
+		String month = (1 + currentDate.getMonth()) + "";
+		month = (month.length() < 2 ? "0" + month : month);
+		
+		String day = currentDate.getDate() + "";
+		day = (day.length() < 2 ? "0" + day : day);
+		
+		String year = currentDate.getYear() + "";
+		year = year.substring(year.length() - 2);
+		
+		ArrayList<Score> addedScores = new ArrayList<Score>();
+		
+		// Add the current date
+		addedScores.add(
+				obj.getScore(
+					month + "/" +
+					day + "/" +
+					year));
+		
+		// Whitespace
+		addedScores.add(obj.getScore(" "));
+		
+		// Add the gen upgrade timer
+		addedScores.add(obj.getScore(UnderwaterBedwars.game.timeToNextGenUpgrade()));
+		
+		// Whitespace
+		addedScores.add(obj.getScore("  "));
+		
+		// Add the teams
+		for(BedwarsTeam team : UnderwaterBedwars.game.getTeams()) {
+			String title = ChatColor.of(team.getColor().toString()) + 
+					(team.getColor().toString().charAt(0) + " ");
+			
+			title += ChatColor.WHITE + team.getColor().getColor() + ": ";
+			
+			if(team.getBed().isBroken()) {
+				title += ChatColor.RED + ChatColor.BOLD.toString() + "✗";
+			} else {
+				title += ChatColor.GREEN + ChatColor.BOLD.toString() + "✓";
+			}
+			
+			if(team.hasPlayer(this.player)) {
+				title += " " + ChatColor.GRAY + "YOU";
+			}
+			
+			addedScores.add(obj.getScore(title));
+		}
+		
+		for(int i = 0; i < addedScores.size(); i++) {
+			int score = addedScores.size() - i;
+			addedScores.get(i).setScore(score);
+		}
+		
+		this.player.setScoreboard(this.scoreboard);
+	}
+	
 	public boolean insideBase() {
 		double playerX = this.getPlayer().getLocation().getX();
 		double playerZ = this.getPlayer().getLocation().getZ();
