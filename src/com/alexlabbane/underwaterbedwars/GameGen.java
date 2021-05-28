@@ -39,6 +39,8 @@ public class GameGen {
 	
 	public GameGen(String genName) {
 		this.genName = genName;		
+		this.holoText = null;
+		
 		this.configureGen();
 	}
 	
@@ -91,7 +93,10 @@ public class GameGen {
 		this.genLevel = 0;
 		this.genTask = null;
 		
-		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
+		
+		if(this.holoText == null)
+			this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
+		
 		this.holoText.setCustomName(" ");
 		this.holoText.setVisible(false);
 		this.holoText.setCustomNameVisible(true);
