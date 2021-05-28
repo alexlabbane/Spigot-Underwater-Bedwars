@@ -5,6 +5,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -13,19 +15,25 @@ import org.bukkit.util.Vector;
 
 import com.alexlabbane.underwaterbedwars.util.Util;
 
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_16_R2.EntityArmorStand;
+
 /**
  * Class to easily create resource generators (i.e. diamonds, emeralds)
  * @author scien
  *
  */
 public class GameGen {
+	private String genName;
+
 	private BukkitTask genTask; // Bukkit task that generates resources
 	private Location genLocation; // Location of the gen
 	private Material material; // Material to be produced
 	private int delay; // Delay between generations (in ticks)
 	private int maxStackSize; // Maximum number of items allowed nearby
 	private int genLevel;
-	private String genName;
+	
+	private ArmorStand holoText;
 	
 	public static final float GEN_RADIUS = 1.5f;
 	
@@ -84,9 +92,26 @@ public class GameGen {
 	public void initialize() {
 		this.stopGen();
 		
+		this.holoText = (ArmorStand) this.genLocation.getWorld().spawnEntity(this.genLocation, EntityType.ARMOR_STAND);
+		this.holoText.setCustomName(" ");
+		this.holoText.setVisible(false);
+		this.holoText.setCustomNameVisible(true);
+		
 		this.genTask = new BukkitRunnable() {
+			int tickCounter = 0;
+			
 			@Override
 			public void run() {
+				tickCounter += Util.TICKS_PER_SECOND;
+				int secondsLeft = (delay - tickCounter) / Util.TICKS_PER_SECOND;
+				holoText.setCustomName(ChatColor.YELLOW + "Spawn in " + ChatColor.RED + secondsLeft + ChatColor.YELLOW + " seconds");
+				
+				if(tickCounter < delay) {
+					return;
+				}
+				
+				tickCounter = 0;
+				
 				if(Util.countDroppedItems(genLocation, material, GameGen.GEN_RADIUS) >= maxStackSize)
 					return;
 				
@@ -94,7 +119,7 @@ public class GameGen {
 				Item droppedItem = genLocation.getWorld().dropItem(genLocation, item);
 				droppedItem.setVelocity(new Vector(0, 0, 0));
 			}
-		}.runTaskTimer(Util.plugin, this.delay, this.delay);
+		}.runTaskTimer(Util.plugin, 0, Util.TICKS_PER_SECOND);
 	}
 	
 	public int getDelay() { return this.delay; }
