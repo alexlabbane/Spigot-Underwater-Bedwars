@@ -6,20 +6,25 @@ import java.util.Queue;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Bed;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.TeamTrap;
 import com.alexlabbane.underwaterbedwars.util.Util;
+
+import net.md_5.bungee.api.ChatColor;
 
 public class BedwarsBed implements Listener {
 	private Location headLocation;
@@ -84,12 +89,36 @@ public class BedwarsBed implements Listener {
 	
 	@EventHandler
 	public void onBedBreak(BlockBreakEvent e) {
+		Player p = e.getPlayer();
+		if(this.team.hasPlayer(p)) {
+			e.setCancelled(true);
+			return;
+		}
+		
 		if(e.getBlock().equals(this.headLocation.getBlock())
 				|| e.getBlock().equals(this.footLocation.getBlock())) {
 			this.broken = true;
 			
 			// Update scoreboard for all players with new bed break
 			UnderwaterBedwars.game.updateScoreboards();
+			
+			for(BedwarsTeam team : UnderwaterBedwars.game.getTeams()) {
+				for(BedwarsPlayer bwPlayer : team.getBedwarsPlayers()) {
+					Player player = bwPlayer.getPlayer();
+					
+					if(team == this.team) {
+						player.sendTitle(
+								"",
+								ChatColor.RED + "Your bed has been destroyed!",
+								0,
+								60,
+								0);
+					}
+					
+					player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+				}
+			}
+			
 			e.setDropItems(false);
 		}	
 	}
@@ -101,7 +130,15 @@ public class BedwarsBed implements Listener {
 			e.setCancelled(true);
 		}
 	}
-		
+	
+	@EventHandler
+	public void onPlayerSetSpawn(PlayerBedLeaveEvent e) {
+		if(e.getBed() == this.headLocation.getBlock()
+				|| e.getBed() == this.footLocation.getBlock()) {
+				e.setSpawnLocation(false);
+			}
+	}
+	
 	@EventHandler
 	public void onPlayerEnterTrapRange(PlayerMoveEvent e) {
 		// Check if bed is broken; make sure player within specified block radius

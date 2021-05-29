@@ -38,6 +38,7 @@ import net.md_5.bungee.api.ChatColor;
 public class BedwarsPlayer {
 	private Player player;
 	private BedwarsTeam team;
+	private boolean stillAlive;
 	
 	private BedwarsArmor armor;
 	private BedwarsTools.Axe axe;
@@ -54,6 +55,7 @@ public class BedwarsPlayer {
 	public BedwarsPlayer(Player p) {
 		this.player = p;
 		this.team = null;
+		this.stillAlive = true;
 		this.armor = BedwarsArmor.LEATHER;
 		this.axe = BedwarsTools.Axe.NONE;
 		this.pickaxe = BedwarsTools.Pickaxe.NONE;
@@ -63,6 +65,9 @@ public class BedwarsPlayer {
 	}
 	
 	public Player getPlayer() { return this.player; }
+	
+	public boolean isStillAlive() { return this.stillAlive; }
+	public void setStillAlive(boolean alive) { this.stillAlive = alive; }
 	
 	public BedwarsTeam getTeam() { return this.team; }
 	public void setTeam(BedwarsTeam team) { this.team = team; }
@@ -432,7 +437,19 @@ public class BedwarsPlayer {
 			title += ChatColor.WHITE + team.getColor().getColor() + ": ";
 			
 			if(team.getBed().isBroken()) {
-				title += ChatColor.RED + ChatColor.BOLD.toString() + "✗";
+				// Count number of players alive on the time
+				int playersAlive = 0;
+				for(BedwarsPlayer bwPlayer : team.getBedwarsPlayers()) {
+					if(bwPlayer.isStillAlive()) {
+						playersAlive++;
+					}
+				}
+				
+				if(playersAlive == 0) {
+					title += ChatColor.RED + ChatColor.BOLD.toString() + "✗";
+				} else {
+					title += ChatColor.GREEN + "" + playersAlive;
+				}
 			} else {
 				title += ChatColor.GREEN + ChatColor.BOLD.toString() + "✓";
 			}

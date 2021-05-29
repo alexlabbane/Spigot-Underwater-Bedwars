@@ -18,6 +18,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -387,6 +388,13 @@ public class BedwarsTeam implements Listener {
 				}
 			}.runTaskLater(this.plugin, 1);			
 			
+			// Return here if player is final kill
+			if(this.bed.isBroken()) {
+				bwPlayer.setStillAlive(false);
+				this.game.updateScoreboards();
+				return;
+			}
+			
 			// Update player title
 			for(int i = 0; i < 5; i++) {
 				final int secondsLeft = 5 - i;
@@ -446,5 +454,5 @@ public class BedwarsTeam implements Listener {
 			// Players open the same instance of the team shop
 			this.game.getTeam(p).teamShop.openInventory((HumanEntity)p);
 		}
-	}	
+	}
 }
