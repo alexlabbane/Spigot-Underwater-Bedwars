@@ -3,13 +3,20 @@ package com.alexlabbane.underwaterbedwars;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
@@ -30,32 +37,137 @@ public class BedwarsGame {
 	private ArrayList<BedwarsTeam> teams;	
 	private ArrayList<GameGen> gens;
 	
+	private BukkitTask genTimerTask;
 	private int genLevel;
 	private int ticksToNextLevel; // How many ticks are left until the next gen upgrade
 	
 	public BedwarsGame(Plugin p) {
 		this.plugin = p;
 		activeGames.add(this);
+		
 		this.gameID = nextID;
 		nextID++;
+		
+		this.genTimerTask = null;
 		this.resetGame();
 	}
 	
 	public void resetGame() {
+		// Kill all non-player entities prior to start of game
+		this.killEntities();
+		
+		// Stop all gens from spawning
+		this.stopGenUpgradeTimer();
+		
+		if(this.gens != null) {
+			for(GameGen gen : this.gens) { 
+				gen.stopGen();
+			}
+		}
+
+		if(this.getTeams() != null) {
+			for(BedwarsTeam team : this.getTeams()) {
+				team.stopGen();
+				
+				// Unregister team as listener
+				HandlerList.unregisterAll(team);
+				HandlerList.unregisterAll(team.getBed());
+			}
+		}
+		
 		this.teams = new ArrayList<BedwarsTeam>();
 		this.gens = new ArrayList<GameGen>();
 		this.genLevel = 0;
 		this.ticksToNextLevel = 0;		
 		
-		// TODO: Pull gens from config
+		// Get all the active teams from the config
+		this.addActiveTeams();
+	}
+	
+	/**
+	 * Starts gens/upgrade countdown
+	 * Teleports all players to starting location
+	 */
+	public void startGame() {
+		new BukkitRunnable() {
+			int secondsBeforeStart = 5;
+			
+			@Override
+			public void run() {
+				if(secondsBeforeStart > 0) {
+					for(BedwarsTeam team : getTeams()) {
+						for(Player player : team.getPlayers()) {
+							player.sendTitle(
+									"",
+									ChatColor.RED + "Game starts in " 
+											+ ChatColor.YELLOW + secondsBeforeStart 
+											+ ChatColor.RED + " seconds",
+									0,
+									Util.TICKS_PER_SECOND,
+									0);
+						}
+					}
+					
+					secondsBeforeStart--;
+				} else {
+					// Get gen locations from config
+					FileConfiguration config = plugin.getConfig();
+					ConfigurationSection genConfig = config.getConfigurationSection("game.gens");
+					
+					for(String key : genConfig.getKeys(false)) {
+						gens.add(new GameGen(key));		
+					}
+					
+					for(BedwarsTeam team : teams) {
+						team.resumeGen();
+						
+						// Teleport all players to start location
+						// Remove effects, put them in survival
+						for(Player player : team.getPlayers()) {
+							player.teleport(team.getSpawnLocation());
+							player.setGameMode(GameMode.SURVIVAL);
+							player.sendTitle(ChatColor.GREEN + "Start!", "", 0, 20, 0);
+							player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
+							for(PotionEffect pe : player.getActivePotionEffects()) {
+								player.removePotionEffect(pe.getType());
+							}
+						}
+					}
+					
+					startGenUpgradeTimer();	
+					this.cancel();
+				}
+			}
+		}.runTaskTimer(this.plugin, 0, Util.TICKS_PER_SECOND);
+	}
+	
+	/**
+	 * Get all active teams from the config and add them to the game
+	 */
+	private void addActiveTeams() {
 		FileConfiguration config = this.plugin.getConfig();
-		ConfigurationSection genConfig = config.getConfigurationSection("game.gens");
+		ConfigurationSection teamConfig = config.getConfigurationSection("teams");
 		
-		for(String key : genConfig.getKeys(false)) {
-			this.gens.add(new GameGen(key));		
+		Bukkit.broadcastMessage("Adding teams " + teamConfig.getKeys(false).size());
+		for(String key : teamConfig.getKeys(false)) {
+			Bukkit.broadcastMessage("Adding " + key);
+			
+			if(config.getBoolean("teams." + key + ".active")) {
+				BedwarsTeam newTeam = new BedwarsTeam("teams." + key, this.plugin, this);
+				newTeam.pauseGen();
+				
+				this.teams.add(newTeam);
+				
+				// Register listener for team
+				Bukkit.getServer().getPluginManager().registerEvents(newTeam, this.plugin);
+			}
 		}
-		
-		this.startGenUpgradeTimer();
+	}
+	
+	public void stopGenUpgradeTimer() {
+		if(this.genTimerTask != null) {
+			this.genTimerTask.cancel();
+		}
 	}
 	
 	/**
@@ -64,8 +176,10 @@ public class BedwarsGame {
 	public void startGenUpgradeTimer() {
 		FileConfiguration config = plugin.getConfig();
 		this.ticksToNextLevel = config.getInt("game.game-level.level-" + (genLevel + 1) + ".delay-ticks");		
-
-		new BukkitRunnable() {
+		
+		this.stopGenUpgradeTimer();
+		
+		this.genTimerTask = new BukkitRunnable() {
 			
 			@Override
 			public void run() {
@@ -172,6 +286,20 @@ public class BedwarsGame {
 		str += ((secondsTimer) < 10 ? "0" + secondsTimer : secondsTimer + "");
 		
 		return str;
+	}
+	
+	/**
+	 * Kill all entities in the game world
+	 */
+	public void killEntities() {
+		World world = Bukkit.getServer().getWorlds().get(0);
+		for(Entity e : world.getEntities()) {
+			if(e instanceof Player) {
+				continue;
+			}
+			
+			e.remove();
+		}
 	}
 	
 	public static BedwarsGame getGame(int gameID) {

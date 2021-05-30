@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -51,6 +52,9 @@ public class BedwarsTeam implements Listener {
 	private ArrayList<Pair<Material, LeveledEnchantment[]>> starterMaterials;
 	private ArrayList<Pair<Material, LeveledEnchantment[]>> starterArmor;
 	
+	// Config path
+	private String configPath;
+	
 	// Team upgrades (TODO: add the rest)
 	private int impalingLevel;
 	private int protLevel;
@@ -74,6 +78,7 @@ public class BedwarsTeam implements Listener {
 	// Gen stuff
 	private BukkitTask genSpawner;
 	private Location genLocation;
+	private boolean genPaused;
 
 	// Team bed
 	private BedwarsBed bed;
@@ -81,20 +86,26 @@ public class BedwarsTeam implements Listener {
 	// Other important locations
 	private Location chestLocation;
 	private Location enderChestLocation;
+	private Location spawnLocation;
 	
-	public BedwarsTeam(ArrayList<BedwarsPlayer> players, String color, Plugin p, BedwarsGame game) {
+	public BedwarsTeam(ArrayList<BedwarsPlayer> players, String configPath, Plugin p, BedwarsGame game) {
 		this.bwPlayers = players;
-		this.initializeTeam(color, p, game);
+		this.initializeTeam(configPath, p, game);
 	}
 	
-	public BedwarsTeam(String color, Plugin p, BedwarsGame game) {
+	public BedwarsTeam(String configPath, Plugin p, BedwarsGame game) {
 		this.bwPlayers = new ArrayList<BedwarsPlayer>();
-		this.initializeTeam(color, p, game);
+		this.initializeTeam(configPath, p, game);
 	}
 	
-	private void initializeTeam(String color, Plugin p, BedwarsGame game) {
+	private void initializeTeam(String configPath, Plugin p, BedwarsGame game) {		
 		this.plugin = p;
-		this.teamColor = TeamColor.valueOf(color.toUpperCase());
+		this.configPath = configPath;
+		FileConfiguration config = this.plugin.getConfig();
+		
+		String color = config.getString(this.configPath + ".color");
+		Bukkit.broadcastMessage(this.configPath);
+		this.teamColor = TeamColor.valueOf(color);
 		this.game = game;
 		
 		this.impalingLevel = 0;
@@ -105,6 +116,15 @@ public class BedwarsTeam implements Listener {
 		this.traps = new TrapQueue();
 		this.healPool = null;
 		
+		// Set spawn location
+		this.spawnLocation = new Location(
+				Bukkit.getServer().getWorlds().get(0),
+				config.getDouble(this.configPath + ".spawn-location.x"),
+				config.getDouble(this.configPath + ".spawn-location.y"),
+				config.getDouble(this.configPath + ".spawn-location.z"));
+		this.spawnLocation.setPitch((float) config.getDouble(this.configPath + ".spawn-location.pitch"));
+		this.spawnLocation.setYaw((float) config.getDouble(this.configPath + ".spawn-location.yaw"));
+
 		// Initialize bed
 		this.bed = new BedwarsBed(this.teamColor, this);
 		
@@ -113,11 +133,11 @@ public class BedwarsTeam implements Listener {
 		
 		Location itemShopLocation = new Location(
 				Bukkit.getServer().getWorlds().get(0),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.x"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.y"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.z"));
-		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.pitch"));
-		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.item-shop-location.yaw"));
+				this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.x"),
+				this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.y"),
+				this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.z"));
+		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.pitch"));
+		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.yaw"));
 		this.itemShopVillager = itemShopLocation.getWorld().spawnEntity(itemShopLocation, EntityType.VILLAGER);
 		this.setItemShopLocation(itemShopLocation);
 		
@@ -130,23 +150,24 @@ public class BedwarsTeam implements Listener {
 		
 		Location teamShopLocation = new Location(
 				Bukkit.getServer().getWorlds().get(0),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.x"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.y"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.z"));
-		teamShopLocation.setPitch((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.pitch"));
-		teamShopLocation.setYaw((float)this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.team-shop-location.yaw"));
+				this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.x"),
+				this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.y"),
+				this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.z"));
+		teamShopLocation.setPitch((float)this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.pitch"));
+		teamShopLocation.setYaw((float)this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.yaw"));
 		this.teamShopVillager = teamShopLocation.getWorld().spawnEntity(teamShopLocation, EntityType.VILLAGER);
 		this.setTeamShopLocation(teamShopLocation);
 		
 		this.teamShopVillager.setSilent(true);
 		Util.freezeEntity(this.teamShopVillager);		
 		// Initialize gen
+		this.genPaused = false;
 		this.setGenLocation(new Location(
 				this.itemShopLocation.getWorld(),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.x"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.y"),
-				this.plugin.getConfig().getDouble(color.toLowerCase() + "-team.gen-location.z")));
-				
+				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.x"),
+				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.y"),
+				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.z")));
+		
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
@@ -164,10 +185,16 @@ public class BedwarsTeam implements Listener {
 	}
 	
 	public TeamColor getColor() { return this.teamColor; }
+	
+	public Location getSpawnLocation() { return this.spawnLocation; }
+	
 	public TrapQueue getQueuedTraps() { return this.traps; }
 	public TeamShop getTeamShop() { return this.teamShop; }
 	public TrapShop getTrapShop() { return this.trapShop; }
+	
 	public BedwarsBed getBed() { return this.bed; }
+	
+	public String getConfigPath() { return this.configPath; }
 	
 	public void setImpalingLevel(int level) { 
 		this.impalingLevel = level; 
@@ -240,14 +267,17 @@ public class BedwarsTeam implements Listener {
 	
 	// TODO: Transfer team gens to use GameGen class
 	public void initializeGen() {
-		if(this.genSpawner != null)
-			this.genSpawner.cancel();		
+	this.stopGen();
 		
 		this.genSpawner = new BukkitRunnable() {
 			int counter = 0;
 			
 			@Override
 			public void run() {
+				if(genPaused) {
+					return;
+				}
+				
 				ItemStack iron = new ItemStack(Material.IRON_INGOT);
 				
 				if(Util.countDroppedItems(genLocation, iron.getType(), 1.5f) < 48) {
@@ -277,8 +307,16 @@ public class BedwarsTeam implements Listener {
 				counter++;
 			}
 			
-		}.runTaskTimer(this.plugin, 20, getGenDelay());
+		}.runTaskTimer(this.plugin, Util.TICKS_PER_SECOND, getGenDelay());
 	}
+	
+	public void stopGen() {
+		if(this.genSpawner != null)
+			this.genSpawner.cancel();	
+	}
+	
+	public void pauseGen() { this.genPaused = true;	}
+	public void resumeGen() { this.genPaused = false; }
 	
 	private int getGenDelay() {
 		switch(this.forgeLevel) {
@@ -393,6 +431,7 @@ public class BedwarsTeam implements Listener {
 			
 			// Return here if player is final kill
 			if(this.bed.isBroken()) {
+				e.setDeathMessage(e.getDeathMessage() + ChatColor.AQUA + ChatColor.BOLD.toString() + " FINAL KILL!");
 				bwPlayer.setStillAlive(false);
 				this.game.updateScoreboards();
 				return;
@@ -413,7 +452,7 @@ public class BedwarsTeam implements Listener {
 			new BukkitRunnable() {
 				@Override
 				public void run() {
-					// TODO: Send to teams respawn location
+					p.teleport(spawnLocation);
 					p.setGameMode(GameMode.SURVIVAL);
 					bwPlayer.setPlayerArmor();
 					bwPlayer.setPlayerStarterMaterials();

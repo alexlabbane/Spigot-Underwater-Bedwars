@@ -36,16 +36,6 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	
     	game = new BedwarsGame(this);
     	
-//    	game.addTeam(TeamColor.PINK);
-//    	game.addTeam(TeamColor.AQUA);
-    	game.addTeam(TeamColor.BLUE);
-//    	game.addTeam(TeamColor.GRAY);
-//    	game.addTeam(TeamColor.GREEN);
-//    	game.addTeam(TeamColor.RED);
-//    	game.addTeam(TeamColor.WHITE);
-//    	game.addTeam(TeamColor.YELLOW);
-
-    	
     	testShop = new ItemShop("PINK", game);
     	getServer().getLogger().log(Level.WARNING, "Underwater Bedwars is enabled!");
     	getServer().getPluginManager().registerEvents(this, this);
@@ -99,7 +89,17 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     				team.setItemShopLocation(((Player) sender).getLocation());
     			}
     		}
+    	
+    	} else if(label.equals("bwgame")) {
+    		if(args.length == 0) {
+    			return false;
+    		}
     		
+    		if(args[0].equals("reset")) {
+    			game.resetGame();
+    		} else if(args[0].equals("start")) {
+    			game.startGame();
+    		}
     	} else if(label.equals("bwteam")) {
     		if(args.length == 0) {
     			if(sender instanceof Player) {

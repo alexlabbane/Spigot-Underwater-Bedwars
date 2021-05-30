@@ -46,18 +46,19 @@ public class BedwarsBed implements Listener {
 	
 	public BedwarsBed(TeamColor bedColor, BedwarsTeam team) {
 		FileConfiguration config = Util.plugin.getConfig();
-		String lowerColor = bedColor.getColor().toLowerCase();
-		
+
 		this.team = team;
+		String configPath = this.team.getConfigPath();
+		
 		this.trappedPlayers = new ArrayDeque<BedwarsPlayer>();
 		this.headLocation = new Location(
 				Bukkit.getServer().getWorlds().get(0), // Overworld
-				config.getDouble(lowerColor + "-team.bed-location.x"),
-				config.getDouble(lowerColor + "-team.bed-location.y"),
-				config.getDouble(lowerColor + "-team.bed-location.z"));
+				config.getDouble(configPath + ".bed-location.x"),
+				config.getDouble(configPath + ".bed-location.y"),
+				config.getDouble(configPath + ".bed-location.z"));
 		
 		this.facing = BlockFace.valueOf(
-				config.getString(lowerColor + "-team.bed-location.facing"));
+				config.getString(configPath + ".bed-location.facing"));
 		this.bedColor = bedColor;
 		this.footLocation = null;
 		this.set();

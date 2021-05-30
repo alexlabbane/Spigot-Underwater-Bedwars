@@ -14,3 +14,5 @@ commands:
     description: Move a teams item shop villager to a designated location
   bwteam:
     description: Operations on teams
+  bwgame:
+    description: Operations on the bedwars game

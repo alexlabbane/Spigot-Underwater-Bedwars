@@ -53,7 +53,8 @@ public class BlockListener implements Listener {
 			if(e.getPlayer() != null) {
 				e.getPlayer().sendMessage(ChatColor.RED + "You can only break blocks placed by players!");
 			}
-			//e.setCancelled(true);
+			
+			e.setCancelled(true);
 			return;
 		}
 	}
