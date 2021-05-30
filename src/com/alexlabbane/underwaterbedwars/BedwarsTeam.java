@@ -34,6 +34,7 @@ import org.bukkit.util.Vector;
 import com.alexlabbane.underwaterbedwars.gui.ItemShop;
 import com.alexlabbane.underwaterbedwars.gui.TeamShop;
 import com.alexlabbane.underwaterbedwars.gui.TrapShop;
+import com.alexlabbane.underwaterbedwars.util.ChatMessages;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.TrapQueue;
@@ -365,12 +366,14 @@ public class BedwarsTeam implements Listener {
 				i--;
 			}
 		}
-	}
+	}	
 	
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player p = e.getEntity();
 		e.getDrops().clear();
+		
+		e.setDeathMessage(ChatMessages.getColoredChatMessage(e.getDeathMessage()));
 		
 		// Downgrade tools
 		BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(p);

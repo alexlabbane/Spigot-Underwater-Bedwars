@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.alexlabbane.underwaterbedwars.util.ChatMessages;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.TeamTrap;
 import com.alexlabbane.underwaterbedwars.util.Util;
@@ -109,10 +110,20 @@ public class BedwarsBed implements Listener {
 					if(team == this.team) {
 						player.sendTitle(
 								"",
-								ChatColor.RED + "Your bed has been destroyed!",
+								ChatColor.RED + "Your bed has been destroyed by " + ChatMessages.getColoredChatMessage(e.getPlayer().getName()) + ChatColor.RED + "!",
 								0,
 								60,
 								0);
+						
+						player.sendMessage(
+								ChatColor.RED + "Your bed has been destroyed by " + 
+								ChatMessages.getColoredChatMessage(e.getPlayer().getName()) + 
+								ChatColor.RED + "!");
+					} else {
+						player.sendMessage(
+								ChatColor.valueOf(bedColor.getColor()) + this.bedColor.getColor() + 
+								ChatColor.RED + " bed was destroyed by " + 
+								ChatMessages.getColoredChatMessage(e.getPlayer().getName()));
 					}
 					
 					player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
