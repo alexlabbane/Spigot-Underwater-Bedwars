@@ -91,14 +91,21 @@ public class BedwarsBed implements Listener {
 	@EventHandler
 	public void onBedBreak(BlockBreakEvent e) {
 		Player p = e.getPlayer();
-		if(this.team.hasPlayer(p)) {
-			e.setCancelled(true);
-			return;
-		}
+//		if(this.team.hasPlayer(p)) {
+//			e.setCancelled(true);
+//			return;
+//		}
 		
 		if(e.getBlock().equals(this.headLocation.getBlock())
 				|| e.getBlock().equals(this.footLocation.getBlock())) {
-			this.broken = true;
+			
+			// Delay setting bed as broken by 5 ticks
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					broken = true;
+				}
+			}.runTaskLater(Util.plugin, 5);
 			
 			// Update scoreboard for all players with new bed break
 			UnderwaterBedwars.game.updateScoreboards();

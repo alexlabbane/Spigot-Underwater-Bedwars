@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.alexlabbane.underwaterbedwars.gui.ItemShop;
+import com.alexlabbane.underwaterbedwars.listeners.BlockListener;
 import com.alexlabbane.underwaterbedwars.listeners.PlayerItemDamageListener;
 import com.alexlabbane.underwaterbedwars.listeners.PlayerMoveArmorListener;
 import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
@@ -51,6 +52,7 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	getServer().getPluginManager().registerEvents(new WaterListener(this), this);
     	getServer().getPluginManager().registerEvents(new PlayerItemDamageListener(), this);
     	getServer().getPluginManager().registerEvents(new PlayerMoveArmorListener(), this);
+    	getServer().getPluginManager().registerEvents(new BlockListener(), this);
     	getServer().getPluginManager().registerEvents(testShop, this);    	
     }
     // Fired when plugin is disabled
