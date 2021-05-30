@@ -151,6 +151,10 @@ public class Util {
 		return count;
 	}
 
+	/**
+	 * Spawn a red firework on the player
+	 * @param player
+	 */
 	public static void spawnFirework(Player player) {
 		Location loc = player.getLocation();
         Firework fw = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
