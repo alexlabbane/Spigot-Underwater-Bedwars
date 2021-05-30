@@ -1,17 +1,26 @@
 package com.alexlabbane.underwaterbedwars.util;
 
+import java.util.Random;
+
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import net.minecraft.server.v1_16_R2.NBTTagCompound;
 
@@ -140,5 +149,26 @@ public class Util {
 		}
 		
 		return count;
+	}
+
+	public static void spawnFirework(Player player) {
+		Location loc = player.getLocation();
+        Firework fw = (Firework) loc.getWorld().spawnEntity(loc, EntityType.FIREWORK);
+        FireworkMeta fwm = fw.getFireworkMeta();
+       
+        fwm.setPower(2);
+        fwm.addEffect(FireworkEffect.builder().withColor(Color.RED).flicker(true).build());
+       
+        fw.setFireworkMeta(fwm);
+        
+        Random rand = new Random();
+        int duration = 20 + (rand.nextInt() % 40);
+        
+        new BukkitRunnable() {
+        	@Override
+        	public void run() {
+                fw.detonate();		
+        	}
+        }.runTaskLater(Util.plugin, duration);
 	}
 }

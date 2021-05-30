@@ -421,6 +421,47 @@ public class BedwarsTeam implements Listener {
 				}
 			}.runTaskLater(this.plugin, 20 * 5);			
 		}
+		
+		// Check if all other teams are dead
+		boolean otherTeamsDead = true;
+		boolean teamStillAlive = false;
+		for(BedwarsTeam team : this.game.getTeams()) {			
+			for(BedwarsPlayer player : team.getBedwarsPlayers()) {
+				if(player.isStillAlive()) {
+					if(team == this) {
+						teamStillAlive = true;
+					} else {
+						otherTeamsDead = false;
+					}
+				}
+			}
+		}
+		
+		// Show victory message if all other teams dead
+		if(otherTeamsDead && teamStillAlive) {
+			Bukkit.broadcastMessage(
+					ChatColor.valueOf(this.teamColor.getColor()) + this.teamColor.getColor()
+					+ ChatColor.GREEN + " team won the game!");
+			
+			for(Player player : this.getPlayers()) {
+				player.sendTitle(ChatColor.YELLOW + ChatColor.BOLD.toString() + "VICTORY!", "", 0, 80, 0);
+
+				new BukkitRunnable() {
+					int count = 0;
+					
+					@Override
+					public void run() {
+						Util.spawnFirework(player);
+						count++;
+						
+						if(count >= 5) {
+							this.cancel();
+						}
+					}
+				}.runTaskTimer(this.plugin, 10, 10);
+			}
+		}
+		
 	}
 	
 	@EventHandler
