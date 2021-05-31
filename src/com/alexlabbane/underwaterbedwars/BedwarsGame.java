@@ -29,6 +29,7 @@ import net.md_5.bungee.api.ChatColor;
 public class BedwarsGame {
 	private Plugin plugin;
 	private int gameID;
+	private boolean mapEdit;
 	private ArrayList<BedwarsTeam> teams;	
 	private ArrayList<GameGen> gens;
 	
@@ -47,6 +48,7 @@ public class BedwarsGame {
 	 */
 	public BedwarsGame(Plugin p) {
 		this.plugin = p;
+		this.mapEdit = false;
 		activeGames.add(this);
 		
 		this.gameID = nextID;
@@ -59,8 +61,9 @@ public class BedwarsGame {
 	/************* Getters/setters *************/
 	
 	public Plugin getPlugin() { return this.plugin; }
-	public ArrayList<BedwarsTeam> getTeams() { return this.teams; }	
-	
+	public ArrayList<BedwarsTeam> getTeams() { return this.teams; }
+	public boolean mapIsEditable() { return this.mapEdit; }
+	public void toggleMapEdit() { this.mapEdit = !this.mapEdit; }
 	
 	/**
 	 * Reset all elements of the game. Does not start the next game (i.e. all gens/upgrades are paused)

@@ -66,9 +66,12 @@ public class BlockListener implements Listener {
 				e.getPlayer().sendMessage(ChatColor.RED + "You can only break blocks placed by players!");
 			}
 			
-			e.setCancelled(true);
+			if(!UnderwaterBedwars.game.mapIsEditable()) {
+				e.setCancelled(true);
+			}
+			
 			return;
-		}
+		}		
 	}
 	
 	/**

@@ -80,6 +80,8 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     		if(args[0].equals("water_flow")) {
     			WaterListener.toggle();
     			Bukkit.broadcastMessage(ChatColor.YELLOW + "Toggled water flow.");
+    		} else if(args[0].equals("map_edit")) {
+    			this.game.toggleMapEdit();
     		}
     	} else if(label.equals("setitemshoplocation") && sender instanceof Player) {
     		//getServer().broadcastMessage("Color is " + args[0]);

@@ -130,15 +130,15 @@ public class BedwarsBed implements Listener {
 	public void onBedBreak(BlockBreakEvent e) {
 		Player p = e.getPlayer();
 		
-		// Can't break your own teams bed
-		if(this.team.hasPlayer(p)) {
-			e.setCancelled(true);
-			return;
-		}
-		
 		// Check if the block broken is the bed
 		if(e.getBlock().equals(this.headLocation.getBlock())
 				|| e.getBlock().equals(this.footLocation.getBlock())) {
+			
+			// Can't break your own teams bed
+			if(this.team.hasPlayer(p)) {
+				e.setCancelled(true);
+				return;
+			}
 			
 			// Delay setting bed as broken by 5 ticks
 			// Allows BlockListener to find out that this is a team bed first
