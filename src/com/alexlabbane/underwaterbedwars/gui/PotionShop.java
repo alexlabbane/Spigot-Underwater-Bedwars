@@ -19,7 +19,7 @@ public class PotionShop extends ItemShop implements Listener {
 	 * @param game		reference to the game the shop is a part of
 	 */
 	public PotionShop(String color, BedwarsGame game) {
-		super(color, game, "Blocks");
+		super(color, game, "Potions");
 	}
 
 	/**
