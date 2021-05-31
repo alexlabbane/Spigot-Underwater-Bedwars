@@ -6,12 +6,15 @@ import org.bukkit.event.Listener;
 
 /**
  * Stops player tools from being damaged
- * @author scien
+ * @author Alex labbane
  *
  */
 public class PlayerItemDamageListener implements Listener {
-	public PlayerItemDamageListener() { }
 	
+	/**
+	 * Cancel item durability decreases
+	 * @param e	the event being handled
+	 */
 	@EventHandler
 	public void PlayerItemDamageEvent(PlayerItemDamageEvent e) {
 		e.setCancelled(true);

@@ -15,15 +15,28 @@ import com.alexlabbane.underwaterbedwars.UnderwaterBedwars;
 
 import net.md_5.bungee.api.ChatColor;
 
+/**
+ * Listener for block place/break events to make sure they are legal
+ * @author Alex Labbane
+ *
+ */
 public class BlockListener implements Listener {
 	// Keep track of all placed blocks in HashSet
 	private static HashSet<Block> placedBlocks = new HashSet<Block>();
 	
+	/**
+	 * For blocks placed by an entity during the game session, allow them to be removed
+	 * @param e	event being handled
+	 */
 	@EventHandler
 	public void onPlaceBlock(BlockPlaceEvent e) {
 		placedBlocks.add(e.getBlock());
 	}
 	
+	/**
+	 * Cancel break events unless they are for a block placed by an entity
+	 * @param e	event being handled
+	 */
 	@EventHandler
 	public void onBreakBlock(BlockBreakEvent e) {
 		if(!isBlockPlacedByPlayer(e.getBlock())) {
@@ -59,6 +72,11 @@ public class BlockListener implements Listener {
 		}
 	}
 	
+	/**
+	 * Determine if a given block was placed by an entity or not
+	 * @param b		the block to check
+	 * @return		true if the block was placed by an entity
+	 */
 	public static boolean isBlockPlacedByPlayer(Block b) {
 		return placedBlocks.contains(b);
 	}
