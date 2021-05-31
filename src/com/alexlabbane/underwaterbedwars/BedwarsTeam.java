@@ -55,7 +55,11 @@ public class BedwarsTeam implements Listener {
 	// Config path
 	private String configPath;
 	
-	// Team upgrades (TODO: add the rest)
+	// Team base bounds
+	private double baseXMin, baseZMin;
+	private double baseXMax, baseZMax;
+	
+	// Team upgrades
 	private int impalingLevel;
 	private int protLevel;
 	private int hasteLevel;
@@ -88,26 +92,108 @@ public class BedwarsTeam implements Listener {
 	private Location enderChestLocation;
 	private Location spawnLocation;
 	
+	/**
+	 * Create a new BedwarsTeam
+	 * @param players		a prepopulated list of players to add to the team
+	 * @param configPath	the path to team parameters in the config file
+	 * @param p				reference to the plugin
+	 * @param game			reference to the BedwarsGame the team is a part of
+	 */
 	public BedwarsTeam(ArrayList<BedwarsPlayer> players, String configPath, Plugin p, BedwarsGame game) {
 		this.bwPlayers = players;
 		this.initializeTeam(configPath, p, game);
 	}
 	
+	/**
+	 * Create a new BedwarsTeam
+	 * @param configPath	the path to team parameters in the config file
+	 * @param p				reference to the plugin
+	 * @param game			reference to the BedwarsGame the team is a part of
+	 */
 	public BedwarsTeam(String configPath, Plugin p, BedwarsGame game) {
 		this.bwPlayers = new ArrayList<BedwarsPlayer>();
 		this.initializeTeam(configPath, p, game);
 	}
 	
+	/************* Getters/setters *************/
+	
+	public TeamColor getColor() { return this.teamColor; }
+	public Location getSpawnLocation() { return this.spawnLocation; }
+	public double getBaseXMin() { return this.baseXMin; }
+	public double getBaseXMax() { return this.baseXMax; }
+	public double getBaseZMin() { return this.baseZMin; }
+	public double getBaseZMax() { return this.baseZMax; }
+	public TrapQueue getQueuedTraps() { return this.traps; }
+	public TeamShop getTeamShop() { return this.teamShop; }
+	public TrapShop getTrapShop() { return this.trapShop; }
+	public BedwarsBed getBed() { return this.bed; }
+	public String getConfigPath() { return this.configPath; }
+	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterMaterials() { return this.starterMaterials; }
+	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() { return this.starterArmor; }
+	public void setItemShopLocation(Location loc) { this.setShopLocation("ITEM", loc, this.itemShopVillager); }
+	public void setTeamShopLocation(Location loc) {	this.setShopLocation("TEAM", loc, this.teamShopVillager); }
+	public void setGenLocation(Location loc) { this.genLocation = loc; }
+	
+	public ArrayList<BedwarsPlayer> getBedwarsPlayers() { return this.bwPlayers; }
+	public ArrayList<Player> getPlayers() {
+		ArrayList<Player> players = new ArrayList<Player>();
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			players.add(bwPlayer.getPlayer());
+		
+		return players;
+	}
+	
+	public int getImpalingLevel() { return this.impalingLevel; }
+	public void setImpalingLevel(int level) { 
+		this.impalingLevel = level; 
+		
+		// Apply the correct effect + level to all players on the team
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			bwPlayer.applyImpalingEffect();
+	}
+	
+	public int getHasteLevel() { return this.hasteLevel; }
+	public void setHasteLevel(int level) { 
+		this.hasteLevel = level; 
+		
+		// Update player haste
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			bwPlayer.setPlayerHaste();
+	}
+	
+	public int getForgeLevel() { return this.forgeLevel; }
+	public void setForgeLevel(int level) { this.forgeLevel = level; }
+
+	public int getHealPoolLevel() { return this.healPoolLevel; }
+	public void setHealPoolLevel(int level) { this.healPoolLevel = level; }
+	
+	public int getProtLevel() { return this.protLevel; }
+	public void setProtectionLevel(int level) { 
+		this.protLevel = level;
+		
+		// Update player armor
+		for(BedwarsPlayer bwPlayer : this.bwPlayers)
+			bwPlayer.setPlayerArmor();
+	}
+	
+	
+	/**
+	 * Initialize all of the data members of the team
+	 * @param configPath	the path in the configuration file to team parameters
+	 * @param p				reference to the plugin
+	 * @param game			reference to the BedwarsGame the team is a part of
+	 */
 	private void initializeTeam(String configPath, Plugin p, BedwarsGame game) {		
 		this.plugin = p;
 		this.configPath = configPath;
-		FileConfiguration config = this.plugin.getConfig();
 		
+		FileConfiguration config = this.plugin.getConfig();
 		String color = config.getString(this.configPath + ".color");
-		Bukkit.broadcastMessage(this.configPath);
+
 		this.teamColor = TeamColor.valueOf(color);
 		this.game = game;
 		
+		// Default all team upgrades
 		this.impalingLevel = 0;
 		this.protLevel = 0;
 		this.hasteLevel = 0;
@@ -115,6 +201,12 @@ public class BedwarsTeam implements Listener {
 		this.healPoolLevel = 0;
 		this.traps = new TrapQueue();
 		this.healPool = null;
+		
+		// Get base bounds
+		this.baseXMin = Util.plugin.getConfig().getDouble(this.configPath + ".base-bounds.x-min");
+		this.baseXMax = Util.plugin.getConfig().getDouble(this.configPath + ".base-bounds.x-max");
+		this.baseZMin = Util.plugin.getConfig().getDouble(this.configPath + ".base-bounds.z-min");
+		this.baseZMax = Util.plugin.getConfig().getDouble(this.configPath + ".base-bounds.z-max");
 		
 		// Set spawn location
 		this.spawnLocation = new Location(
@@ -142,9 +234,11 @@ public class BedwarsTeam implements Listener {
 		this.setItemShopLocation(itemShopLocation);
 		
 		this.itemShopVillager.setSilent(true);
+		
+		// Stop the villager from moving around
 		Util.freezeEntity(this.itemShopVillager);
 		
-		// TODO: Initialize team shop
+		// Initialize team shop
 		this.teamShop = new TeamShop(color, game);
 		this.trapShop = new TrapShop(color, game);
 		
@@ -159,8 +253,11 @@ public class BedwarsTeam implements Listener {
 		this.setTeamShopLocation(teamShopLocation);
 		
 		this.teamShopVillager.setSilent(true);
-		Util.freezeEntity(this.teamShopVillager);		
-		// Initialize gen
+		
+		// Stop the villager from moving around
+		Util.freezeEntity(this.teamShopVillager);
+		
+		// Initialize base gen
 		this.genPaused = false;
 		this.setGenLocation(new Location(
 				this.itemShopLocation.getWorld(),
@@ -168,6 +265,7 @@ public class BedwarsTeam implements Listener {
 				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.y"),
 				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.z")));
 		
+		// Give players all starter armor/tools
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.starterArmor = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
 		this.initializeStarterMaterials();
@@ -175,65 +273,12 @@ public class BedwarsTeam implements Listener {
 		this.initializeGen();
 	}
 	
-	public ArrayList<BedwarsPlayer> getBedwarsPlayers() { return this.bwPlayers; }
-	public ArrayList<Player> getPlayers() {
-		ArrayList<Player> players = new ArrayList<Player>();
-		for(BedwarsPlayer bwPlayer : this.bwPlayers)
-			players.add(bwPlayer.getPlayer());
-		
-		return players;
-	}
-	
-	public TeamColor getColor() { return this.teamColor; }
-	
-	public Location getSpawnLocation() { return this.spawnLocation; }
-	
-	public TrapQueue getQueuedTraps() { return this.traps; }
-	public TeamShop getTeamShop() { return this.teamShop; }
-	public TrapShop getTrapShop() { return this.trapShop; }
-	
-	public BedwarsBed getBed() { return this.bed; }
-	
-	public String getConfigPath() { return this.configPath; }
-	
-	public void setImpalingLevel(int level) { 
-		this.impalingLevel = level; 
-		
-		for(BedwarsPlayer bwPlayer : this.bwPlayers)
-			bwPlayer.applyImpalingEffect();
-	}
-	public int getImpalingLevel() { return this.impalingLevel; }
-	
-	public void setHasteLevel(int level) { 
-		this.hasteLevel = level; 
-		
-		// Update player haste
-		for(BedwarsPlayer bwPlayer : this.bwPlayers)
-			bwPlayer.setPlayerHaste();
-	}
-	public int getHasteLevel() { return this.hasteLevel; }
-	
-	public void setForgeLevel(int level) { this.forgeLevel = level; }
-	public int getForgeLevel() { return this.forgeLevel; }
-	
-	public void setHealPoolLevel(int level) { this.healPoolLevel = level; }
-	public int getHealPoolLevel() { return this.healPoolLevel; }
-	
-	public void setProtectionLevel(int level) { 
-		this.protLevel = level;
-		
-		// Update player armor
-		for(BedwarsPlayer bwPlayer : this.bwPlayers)
-			bwPlayer.setPlayerArmor();
-	}
-	public int getProtLevel() { return this.protLevel; }
-	
-	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterMaterials() { return this.starterMaterials; }
-	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() { return this.starterArmor; }
-	
-	public void setItemShopLocation(Location loc) { this.setShopLocation("ITEM", loc, this.itemShopVillager); }
-	public void setTeamShopLocation(Location loc) {	this.setShopLocation("TEAM", loc, this.teamShopVillager); }
-	
+	/**
+	 * Move the shop of given shopType to a new location on the map
+	 * @param shopType		the type of shop that should be moved
+	 * @param newLoc		the new location of the shop
+	 * @param shopEntity	the entity the shop is attached to
+	 */
 	private void setShopLocation(String shopType, Location newLoc, Entity shopEntity) {
 		if(shopType.equals("ITEM"))
 			this.itemShopLocation = newLoc;
@@ -247,17 +292,19 @@ public class BedwarsTeam implements Listener {
 			public void run() {
 				shopEntity.teleport(newLoc);
 			}
-		}.runTaskLater(this.plugin, 20);
+		}.runTaskLater(this.plugin, Util.TICKS_PER_SECOND);
 	}
 	
-	public void setGenLocation(Location loc) {
-		this.genLocation = loc;
-	}
-	
+	/**
+	 * Add default starter materials for all team members
+	 */
 	public void initializeStarterMaterials() {
 		this.starterMaterials.add(new Pair<Material, LeveledEnchantment[]>(Material.TRIDENT, new LeveledEnchantment[]{ new LeveledEnchantment(Enchantment.LOYALTY, 1) })); // trident always at index 0
 	}
 	
+	/**
+	 * Add default armor for all team members
+	 */
 	public void initializeStarterArmor() {
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_BOOTS, null)); // boots always index 0
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_LEGGINGS, null)); // leggings always index 1
@@ -265,7 +312,10 @@ public class BedwarsTeam implements Listener {
 		this.starterArmor.add(new Pair<Material, LeveledEnchantment[]>(Material.LEATHER_HELMET, new LeveledEnchantment[] { new LeveledEnchantment(Enchantment.WATER_WORKER, 1)} )); // helmet always index 3
 	}
 	
-	// TODO: Transfer team gens to use GameGen class
+	/**
+	 * Initialize base gen for the team. Cancels any existing gen first.
+	 * Separated from GameGen class (only used for game wide gens such as diamonds/emeralds)
+	 */
 	public void initializeGen() {
 	this.stopGen();
 		
@@ -295,8 +345,8 @@ public class BedwarsTeam implements Listener {
 					}
 				}
 				
-				if(counter % 32 == 0 && forgeLevel >= 3) {
-					// Spawn emerald 1/32 as often as iron
+				if(counter % 64 == 0 && forgeLevel >= 3) {
+					// Spawn emerald 1/64 as often as iron
 					ItemStack emerald = new ItemStack(Material.EMERALD);
 					if(Util.countDroppedItems(genLocation, emerald.getType(), 1.5f) < 4) {
 						Item droppedEmerald = genLocation.getWorld().dropItem(genLocation, emerald);
@@ -310,14 +360,28 @@ public class BedwarsTeam implements Listener {
 		}.runTaskTimer(this.plugin, Util.TICKS_PER_SECOND, getGenDelay());
 	}
 	
+	/**
+	 * Stop the team generator from making resources. Destroys the task in charge of the generator.
+	 */
 	public void stopGen() {
 		if(this.genSpawner != null)
 			this.genSpawner.cancel();	
 	}
 	
+	/**
+	 * Pauses the team generator from making new resources. Does not destroy the task in charge of
+	 * the generator.
+	 */
 	public void pauseGen() { this.genPaused = true;	}
+	/**
+	 * Resume a paused team generator.
+	 */
 	public void resumeGen() { this.genPaused = false; }
 	
+	/**
+	 * Determines how long the generator should take to spawn new resources
+	 * @return	the number of ticks between each counter increment in the generator
+	 */
 	private int getGenDelay() {
 		switch(this.forgeLevel) {
 		case 0:
@@ -335,6 +399,9 @@ public class BedwarsTeam implements Listener {
 		return 20;
 	}
 	
+	/**
+	 * Start a heal pool around the team base. Heals all players inside.
+	 */
 	public void startHealPool() {
 		if(this.healPoolLevel == 0)
 			return;
@@ -353,9 +420,12 @@ public class BedwarsTeam implements Listener {
 					}
 				}
 			}
-		}.runTaskTimer(this.plugin, 20, 20);
+		}.runTaskTimer(this.plugin, Util.TICKS_PER_SECOND, Util.TICKS_PER_SECOND);
 	}
 	
+	/**
+	 * Cancel a heal pool around the team base, if it exists
+	 */
 	public void stopHealPool() {
 		if(this.healPool == null) {
 			return;
@@ -364,20 +434,10 @@ public class BedwarsTeam implements Listener {
 		this.healPool.cancel();
 	}
 	
-	// TODO: Perform this in BedwarsPlayer class
-	public void setPlayerStarterMaterials(Player player) {
-		PlayerInventory inv = player.getInventory();
-		
-		for(Pair<Material, LeveledEnchantment[]> itemPair : this.starterMaterials) {
-			ItemStack item = new ItemStack(itemPair.getFirst());
-			if(itemPair.getSecond() != null)
-				for(LeveledEnchantment le : itemPair.getSecond())
-					item.addEnchantment(le.getEnchantment(), le.getLevel());
-
-			inv.addItem(item);
-		}
-	}
-	
+	/**
+	 * Add a new player to the team
+	 * @param player	the player to be added
+	 */
 	public void addPlayer(Player player) {
 		BedwarsPlayer newBedwarsPlayer = new BedwarsPlayer(player);
 		
@@ -391,6 +451,11 @@ public class BedwarsTeam implements Listener {
 		this.setHasteLevel(this.hasteLevel); // Make sure new player gets haste upgrade applied
 	}
 	
+	/**
+	 * Check if the team has a given player on it
+	 * @param player	the player to check
+	 * @return			true if the player is on the team
+	 */
 	public boolean hasPlayer(Player player) {
 		return this.getPlayers().contains(player);
 	}
@@ -406,21 +471,26 @@ public class BedwarsTeam implements Listener {
 		}
 	}	
 	
+	/**
+	 * Handle death of a player on this team
+	 * @param e	the player death event being handled
+	 */
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player p = e.getEntity();
 		e.getDrops().clear();
 		
+		// Color player names with their team color in the death message
 		e.setDeathMessage(ChatMessages.getColoredChatMessage(e.getDeathMessage()));
 		
-		// Downgrade tools
 		BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(p);
 		
 		if(bwPlayer != null && this.hasPlayer(p)) {
+			// Downgrade tools
 			bwPlayer.downgradeAxe();
 			bwPlayer.downgradePickaxe();
 			
-			// Respawn player immediately in spectator
+			// Respawn player immediately in spectator (1 tick delay)
 			new BukkitRunnable() {
 				@Override
 				public void run() {
@@ -437,15 +507,15 @@ public class BedwarsTeam implements Listener {
 				return;
 			}
 			
-			// Update player title
+			// Update player title for respawn countdown
 			for(int i = 0; i < 5; i++) {
 				final int secondsLeft = 5 - i;
 				new BukkitRunnable() {
 					@Override
 					public void run() {
-						p.sendTitle(ChatColor.RED + "Respawn in " + secondsLeft + " seconds...", ChatColor.RED + "Please wait.", 0, 20, 0);
+						p.sendTitle(ChatColor.RED + "Respawn in " + secondsLeft + " seconds...", ChatColor.RED + "Please wait.", 0, Util.TICKS_PER_SECOND, 0);
 					}
-				}.runTaskLater(this.plugin, 20 * i);	
+				}.runTaskLater(this.plugin, Util.TICKS_PER_SECOND * i);	
 			}
 
 			// Put the player back at base and in survival
@@ -458,7 +528,7 @@ public class BedwarsTeam implements Listener {
 					bwPlayer.setPlayerStarterMaterials();
 					bwPlayer.setPlayerHaste();
 				}
-			}.runTaskLater(this.plugin, 20 * 5);			
+			}.runTaskLater(this.plugin, Util.TICKS_PER_SECOND * 5);			
 		}
 		
 		// Check if all other teams are dead
@@ -503,6 +573,10 @@ public class BedwarsTeam implements Listener {
 		
 	}
 	
+	/**
+	 * Disallow friendly fire
+	 * @param e	the damage event being handled
+	 */
 	@EventHandler
 	public void onDamage(EntityDamageByEntityEvent e) {
 		Entity damagee = e.getEntity();
@@ -515,13 +589,17 @@ public class BedwarsTeam implements Listener {
 		if(damagee instanceof Player && damager instanceof Player) {
 			Player pDamagee = (Player)damagee;
 			Player pDamager = (Player)damager;
-			
-			Bukkit.broadcastMessage(pDamagee.getName() + " " + this.hasPlayer(pDamagee) + " " + pDamager.getName() + " " + this.hasPlayer(pDamager));
+
+			// If both players are on this team, cancel the event
 			if(this.hasPlayer(pDamagee) && this.hasPlayer(pDamager))
 				e.setCancelled(true);
 		}
 	}
 	
+	/**
+	 * Open correct shop associated with team villager
+	 * @param e	the event being handled
+	 */
 	@EventHandler
 	public void onPlayerInteractEntity(PlayerInteractEntityEvent e) {
 		Player p = e.getPlayer();
@@ -532,7 +610,7 @@ public class BedwarsTeam implements Listener {
 			ItemShop playerShop = new ItemShop(this.teamColor.getColor(), this.itemShop);
 			playerShop.initializeItems(p); // Populate with player specific tool upgrades
 			playerShop.openInventory((HumanEntity)p);
-			// this.itemShop.openInventory((HumanEntity)p); // DEPRECATED: each player opens same instance of the shop
+			
 		} else if (entity == this.teamShopVillager) {
 			// Players open the same instance of the team shop
 			this.game.getTeam(p).teamShop.openInventory((HumanEntity)p);

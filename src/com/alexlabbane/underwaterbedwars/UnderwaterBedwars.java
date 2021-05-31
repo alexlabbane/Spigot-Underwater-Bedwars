@@ -23,12 +23,20 @@ import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.Util;
 
+/**
+ * The main plugin class for Underwater Bedwars
+ * @author Alex Labbane
+ *
+ */
 public class UnderwaterBedwars extends JavaPlugin implements Listener {
 	
-	private static ItemShop testShop;
+	// Dangerous: allows anybody to access/alter game object
 	public static BedwarsGame game;
 	
-    // Fired when plugin is first enabled
+    /**
+     * Performs some initial setup and registers listeners
+     * Also instantiates main game object
+     */
     @Override
     public void onEnable() {
     	Util.setPlugin(this);
@@ -36,27 +44,29 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	
     	game = new BedwarsGame(this);
     	
-    	testShop = new ItemShop("PINK", game);
     	getServer().getLogger().log(Level.WARNING, "Underwater Bedwars is enabled!");
     	getServer().getPluginManager().registerEvents(this, this);
     	getServer().getPluginManager().registerEvents(new WaterListener(this), this);
     	getServer().getPluginManager().registerEvents(new PlayerItemDamageListener(), this);
     	getServer().getPluginManager().registerEvents(new PlayerMoveArmorListener(), this);
     	getServer().getPluginManager().registerEvents(new BlockListener(), this);
-    	getServer().getPluginManager().registerEvents(testShop, this);    	
     }
+    
     // Fired when plugin is disabled
     @Override
     public void onDisable() {
     	
     }
     
+    // Fired when player logs in to server
     @EventHandler
     public void onLogin(PlayerLoginEvent e) {
-    	game.getTeams().get(0).addPlayer(e.getPlayer());
-    	Bukkit.broadcastMessage("Debug: Added to white team");
+
     }
     
+    /**
+     * Handles all console commands (WIP)
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
     	if(sender instanceof Player) {
@@ -75,11 +85,6 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     			WaterListener.toggle();
     			Bukkit.broadcastMessage(ChatColor.YELLOW + "Toggled water flow.");
     		}
-    	} else if(label.equals("testshop")) {
-    		if(sender instanceof HumanEntity)
-    			testShop.openInventory((HumanEntity)sender);
-    		
-    		return true;
     	} else if(label.equals("setitemshoplocation") && sender instanceof Player) {
     		//getServer().broadcastMessage("Color is " + args[0]);
     		TeamColor color = TeamColor.valueOf(args[0]);
@@ -142,20 +147,6 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     				sender.sendMessage(ChatColor.GREEN + p.getName() + " has been added to " + addedTeam.getColor());
     			p.sendMessage(ChatColor.GREEN + "You have been added to " + addedTeam.getColor());
     			return true;
-    		} else if(args[0].equals("create")) {
-    			if(args.length < 2)
-    				return false;
-    			
-    			// Create a new team
-    			TeamColor color = TeamColor.valueOf(args[1].toUpperCase());
-    			for(BedwarsTeam team : game.getTeams())
-    				if(team.getColor() == color) {
-    					sender.sendMessage(ChatColor.RED + color.toString() + " team already exists!");
-    					return false;
-    				}
-    			
-    			game.addTeam(color);
-    			return true;
     		} else if(args[0].equals("remove")) { //team remove <player> <team>
     			if(args.length <= 2)
     				return false;
@@ -213,6 +204,12 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	return false;
     }
     
+    /**
+     * Retrieves the Player instance associated with a given player name
+     * @param world			the world to search in
+     * @param playerName	the name of the player to find
+     * @return				the Player instance associated with playerName
+     */
     public Player getPlayerByName(World world, String playerName) {
     	List<Player> players = world.getPlayers();
     	

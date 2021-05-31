@@ -8,8 +8,6 @@ author: Alex Labbane
 commands:
   toggle:
     description: Toggle effects
-  testshop:
-    description: Test the shop, duh
   setitemshoplocation:
     description: Move a teams item shop villager to a designated location
   bwteam:

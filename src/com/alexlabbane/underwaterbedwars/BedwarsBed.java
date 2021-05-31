@@ -27,6 +27,11 @@ import com.alexlabbane.underwaterbedwars.util.Util;
 
 import net.md_5.bungee.api.ChatColor;
 
+/**
+ * Represents the bed for a BedwarsTeam in a BedwarsGame
+ * @author Alex Labbane
+ *
+ */
 public class BedwarsBed implements Listener {
 	private Location headLocation;
 	private Location footLocation;
@@ -37,13 +42,25 @@ public class BedwarsBed implements Listener {
 	private BedwarsTeam team; // Team the bed belongs to
 	private Queue<BedwarsPlayer> trappedPlayers;
 	
+	/************* Static members *************/
+
 	private static int TRAP_COOLDOWN = 20 * 30; // 30 second cooldown for traps (per player)
 	private static int TRAP_RADIUS_SQUARED = 6 * 6; // trigger traps in 6 block radius 
 	
+	/**
+	 * Create a new bed for a team
+	 * @param bedColor the color of the bed block
+	 * @param team the team the bed belongs to
+	 */
 	public BedwarsBed(String bedColor, BedwarsTeam team) {
 		this(TeamColor.valueOf(bedColor), team);
 	}
 	
+	/**
+	 * Create a new bed for a team
+	 * @param bedColor the color of the bed block
+	 * @param team the team the bed belongs to
+	 */
 	public BedwarsBed(TeamColor bedColor, BedwarsTeam team) {
 		FileConfiguration config = Util.plugin.getConfig();
 
@@ -66,10 +83,22 @@ public class BedwarsBed implements Listener {
 		Bukkit.getServer().getPluginManager().registerEvents(this, Util.plugin);
 	}
 	
+	/************* Getters/Setters *************/
+	
 	public Location getHeadLocation() { return this.headLocation; }
 	public Location getFootLocation() { return this.footLocation; }
+	public Queue<BedwarsPlayer> getTrappedPlayers() { return this.trappedPlayers; }
 	public boolean isBroken() { return this.broken; }
 	
+	// Static getters
+	public static int getTrapCooldown() { return TRAP_COOLDOWN; }
+	public static int getTrapRadiusSquared() { return TRAP_RADIUS_SQUARED; }
+	public static double getTrapRadius() { return Math.sqrt(TRAP_RADIUS_SQUARED); }
+	
+	
+	/**
+	 * Creates the bed block in the world and sets it to not broken
+	 */
 	public void set() {
 		this.broken = false;
 		
@@ -82,35 +111,48 @@ public class BedwarsBed implements Listener {
 	           ((Bed) data).setFacing(facing);
 	        }));
 	        
+	        // After placing the head of the bed, get the location of the foot
 	        start = start.getRelative(facing.getOppositeFace());
 	        
+	        // Only sets the foot location one time
 	        if(this.footLocation == null)
 	        	this.footLocation = start.getLocation();
 	    }
 	}
 	
+	/**
+	 * Whenever a bed is broken, we check to see if it is the bed
+	 * and update it to broken if so. Also updates all player
+	 * scoreboards and sends notification message to players
+	 * @param e the block break event being handled
+	 */
 	@EventHandler
 	public void onBedBreak(BlockBreakEvent e) {
 		Player p = e.getPlayer();
-//		if(this.team.hasPlayer(p)) {
-//			e.setCancelled(true);
-//			return;
-//		}
 		
+		// Can't break your own teams bed
+		if(this.team.hasPlayer(p)) {
+			e.setCancelled(true);
+			return;
+		}
+		
+		// Check if the block broken is the bed
 		if(e.getBlock().equals(this.headLocation.getBlock())
 				|| e.getBlock().equals(this.footLocation.getBlock())) {
 			
 			// Delay setting bed as broken by 5 ticks
+			// Allows BlockListener to find out that this is a team bed first
 			new BukkitRunnable() {
 				@Override
 				public void run() {
 					broken = true;
+					
+					// Update scoreboard for all players with new bed break
+					UnderwaterBedwars.game.updateScoreboards();
 				}
 			}.runTaskLater(Util.plugin, 5);
 			
-			// Update scoreboard for all players with new bed break
-			UnderwaterBedwars.game.updateScoreboards();
-			
+			// Send notification message to players
 			for(BedwarsTeam team : UnderwaterBedwars.game.getTeams()) {
 				for(BedwarsPlayer bwPlayer : team.getBedwarsPlayers()) {
 					Player player = bwPlayer.getPlayer();
@@ -138,10 +180,15 @@ public class BedwarsBed implements Listener {
 				}
 			}
 			
+			// Don't drop the bed on the ground when it is broken
 			e.setDropItems(false);
 		}	
 	}
 	
+	/**
+	 * Prevent players from sleeping in the bed
+	 * @param e the event being handled
+	 */
 	@EventHandler
 	public void onSleep(PlayerBedEnterEvent e) {
 		if(e.getBed() == this.headLocation.getBlock()
@@ -150,6 +197,10 @@ public class BedwarsBed implements Listener {
 		}
 	}
 	
+	/**
+	 * Prevent players from setting their spawn on the bed
+	 * @param e the event being handled
+	 */
 	@EventHandler
 	public void onPlayerSetSpawn(PlayerBedLeaveEvent e) {
 		if(e.getBed() == this.headLocation.getBlock()
@@ -158,6 +209,11 @@ public class BedwarsBed implements Listener {
 			}
 	}
 	
+	/**
+	 * Check if players are in trap range of an opposing bed
+	 * when they move
+	 * @param e the event being handled
+	 */
 	@EventHandler
 	public void onPlayerEnterTrapRange(PlayerMoveEvent e) {
 		// Check if bed is broken; make sure player within specified block radius

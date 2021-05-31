@@ -19,12 +19,12 @@ import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_16_R2.EntityArmorStand;
 
 /**
- * Class to easily create resource generators (i.e. diamonds, emeralds)
- * @author scien
+ * Represents game resource generators (i.e. diamonds, emeralds)
+ * @author Alex Labbane
  *
  */
 public class GameGen {
-	private String genName;
+	private String genName; // As specified in the configuration file
 
 	private BukkitTask genTask; // Bukkit task that generates resources
 	private Location genLocation; // Location of the gen
@@ -33,7 +33,9 @@ public class GameGen {
 	private int maxStackSize; // Maximum number of items allowed nearby
 	private int genLevel;
 	
-	private ArmorStand holoText;
+	private ArmorStand holoText; // Used to put holographic text above the gen
+	
+	/************* Static members *************/
 	
 	public static final float GEN_RADIUS = 1.5f;
 	
@@ -61,6 +63,12 @@ public class GameGen {
 		this.initialize();
 	}
 	
+	/************* Getters/setters *************/
+	
+	public int getMaxStackSize() { return this.maxStackSize; }
+	public void setMaxStackSize(int stackSize) { this.maxStackSize = stackSize; }
+	
+	public int getGenLevel() { return this.genLevel; }
 	public void setGenLevel(int level) {
 		if(this.genName == null)
 			return;
@@ -69,6 +77,17 @@ public class GameGen {
 		this.configureGen();
 	}
 	
+	public int getDelay() { return this.delay; }
+	public int getDelaySeconds() { return this.delay / Util.TICKS_PER_SECOND; }
+	public void setDelay(int ticks) {
+		this.delay = ticks;
+		this.initialize();
+	}
+
+	
+	/**
+	 * Get initial values of member variables from the config
+	 */
 	public void configureGen() {
 		if(this.genName == null)
 			return;
@@ -101,8 +120,11 @@ public class GameGen {
 		this.holoText.setCustomNameVisible(true);
 		
 		this.initialize();	
-}
+	}
 	
+	/**
+	 * Start the gen spawning resources
+	 */
 	public void initialize() {
 		this.stopGen();		
 
@@ -116,6 +138,7 @@ public class GameGen {
 				holoText.setCustomName(ChatColor.YELLOW + "Spawn in " + ChatColor.RED + secondsLeft + ChatColor.YELLOW + " seconds");
 				
 				if(tickCounter < delay) {
+					// Stop here if the spawn timer hasn't reached zero yet
 					return;
 				}
 				
@@ -131,17 +154,10 @@ public class GameGen {
 		}.runTaskTimer(Util.plugin, 0, Util.TICKS_PER_SECOND);
 	}
 	
-	public int getDelay() { return this.delay; }
-	public int getDelaySeconds() { return this.delay / Util.TICKS_PER_SECOND; }
-	public void setDelay(int ticks) {
-		this.delay = ticks;
-		this.initialize();
-	}
-	
-	public int getMaxStackSize() { return this.maxStackSize; }
-	public void setMaxStackSize(int stackSize) { this.maxStackSize = stackSize; }
-	
-	
+	/**
+	 * Stop the gen from spawning resources. Must be re-initialized
+	 * to start spawning resources again using {@link #initialize()}
+	 */
 	public void stopGen() {
 		if(this.genTask != null) {
 			this.genTask.cancel();

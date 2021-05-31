@@ -32,7 +32,7 @@ import net.md_5.bungee.api.ChatColor;
  * Class to wrap Player objects with additional bedwars game state information
  * needed for individual players (such as tools upgrades, armor upgrades, etc).
  * Also provides various utility functions for player management
- * @author scien
+ * @author Alex Labbane
  *
  */
 public class BedwarsPlayer {
@@ -50,7 +50,7 @@ public class BedwarsPlayer {
 	/**
 	 * Construct a new Bedwars Player attached to player p
 	 * Starts players with no tools and base armor
-	 * @param p
+	 * @param p		the Player associated with BedwarsPlayer being created
 	 */
 	public BedwarsPlayer(Player p) {
 		this.player = p;
@@ -63,6 +63,8 @@ public class BedwarsPlayer {
 		
 		this.updateScoreboard();
 	}
+	
+	/************* Getters/setters *************/
 	
 	public Player getPlayer() { return this.player; }
 	
@@ -83,17 +85,19 @@ public class BedwarsPlayer {
 	
 	public BedwarsArmor getArmor() { return this.armor; }
 	
+	
 	/**
 	 * Sets the armor level of player to newArmor
 	 * Allows armor downgrades (i.e. from iron to leather)
-	 * @param newArmor
+	 * @param newArmor	the new armor tier to apply
 	 */
 	public void setArmor(BedwarsArmor newArmor) {
 		this.armor = newArmor;
+		this.setPlayerArmor();
 	}
 	
 	/**
-	 * Set the players armor to whatever armor they have bought
+	 * Set the actual players armor to whatever armor they have bought
 	 * Adds enchantments based on team upgrades
 	 */
 	public void setPlayerArmor() {
@@ -152,6 +156,9 @@ public class BedwarsPlayer {
 		inv.setHelmet(finishedArmor.get(3));
 	}
 	
+	/**
+	 * Give the player any starting items they have purchased (i.e. pickaxe, axe, etc.)
+	 */
 	public void setPlayerStarterMaterials() {
 		PlayerInventory inv = this.player.getInventory();
 		
@@ -255,7 +262,7 @@ public class BedwarsPlayer {
 	/**
 	 * Upgrade the pickaxe of a Bedwars Player
 	 * Will fail to upgrade if player already has highest tier pickaxe
-	 * @return true if upgrade occurred, false if upgrade failed
+	 * @return 	true if upgrade occurred, false if upgrade failed
 	 */
 	public boolean upgradePickaxe() {
 		if(this.pickaxe != BedwarsTools.Pickaxe.getUpgrade(this.pickaxe)) {
@@ -269,7 +276,7 @@ public class BedwarsPlayer {
 	/**
 	 * Downgrade the pickaxe of a Bedwars Player
 	 * Will fail to downgrade if player has no pickaxe or lowest tier pickaxe
-	 * @return true if downgrade occurred, false if downgrade failed
+	 * @return 	true if downgrade occurred, false if downgrade failed
 	 */
 	public boolean downgradePickaxe() {
 		if(this.pickaxe != BedwarsTools.Pickaxe.getDowngrade(this.pickaxe)) {
@@ -283,7 +290,7 @@ public class BedwarsPlayer {
 	/**
 	 * Upgrade the axe of a Bedwars Player
 	 * Will fail to upgrade if player already has highest tier axe
-	 * @return true if upgrade occurred, false if upgrade failed
+	 * @return 	true if upgrade occurred, false if upgrade failed
 	 */
 	public boolean upgradeAxe() {
 		if(this.axe != BedwarsTools.Axe.getUpgrade(this.axe)) {
@@ -297,7 +304,7 @@ public class BedwarsPlayer {
 	/**
 	 * Downgrade the axe of a Bedwars Player
 	 * Will fail to downgrade if player has no axe or lowest tier axe
-	 * @return true if downgrade occurred, false if downgrade failed
+	 * @return 	true if downgrade occurred, false if downgrade failed
 	 */
 	public boolean downgradeAxe() {
 		if(this.axe != BedwarsTools.Axe.getDowngrade(this.axe)) {
@@ -311,7 +318,7 @@ public class BedwarsPlayer {
 	/**
 	 * Upgrade the axe of a Bedwars Player
 	 * Will fail to upgrade if player already has highest tier axe
-	 * @return true if upgrade occurred, false if upgrade failed
+	 * @return 	true if upgrade occurred, false if upgrade failed
 	 */
 	public boolean upgradeShears() {
 		if(this.shears != BedwarsTools.Shears.getUpgrade(this.shears)) {
@@ -322,6 +329,10 @@ public class BedwarsPlayer {
 		return false;
 	}
 	
+	/**
+	 * Give the actual player the correct tier pickaxe. If a player
+	 * already has a pickaxe, replace it.
+	 */
 	public void setPlayerPickaxe() {
 		PlayerInventory inv = this.player.getInventory();
 		
@@ -346,6 +357,10 @@ public class BedwarsPlayer {
 		}
 	}
 	
+	/**
+	 * Give the actual player the correct tier axe. If a player
+	 * already has a axe, replace it.
+	 */
 	public void setPlayerAxe() {
 		PlayerInventory inv = this.player.getInventory();
 		
@@ -370,6 +385,10 @@ public class BedwarsPlayer {
 		}
 	}
 	
+	/**
+	 * Give the actual player the correct tier shears. If a player
+	 * already has shears, replace them.
+	 */
 	public void setPlayerShears() {
 		PlayerInventory inv = this.player.getInventory();
 		
@@ -469,13 +488,17 @@ public class BedwarsPlayer {
 		this.player.setScoreboard(this.scoreboard);
 	}
 	
+	/**
+	 * Determine if the player is inside a base or not
+	 * @return true if the player is inside
+	 */
 	public boolean insideBase() {
 		double playerX = this.getPlayer().getLocation().getX();
 		double playerZ = this.getPlayer().getLocation().getZ();
-		double xMin = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.x-min");
-		double xMax = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.x-max");
-		double zMin = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.z-min");
-		double zMax = Util.plugin.getConfig().getDouble(this.team.getColor().getColor().toLowerCase() + "-team.base-bounds.z-max");
+		double xMin = this.team.getBaseXMin();
+		double xMax = this.team.getBaseXMax();
+		double zMin = this.team.getBaseZMin();
+		double zMax = this.team.getBaseZMax();
 		
 		return (playerX >= xMin && playerX <= xMax && playerZ >= zMin && playerZ <= zMax);
 	}
