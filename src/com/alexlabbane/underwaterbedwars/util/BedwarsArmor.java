@@ -2,7 +2,7 @@ package com.alexlabbane.underwaterbedwars.util;
 
 /**
  * Enum to define current armor level of a Bedwars Player
- * @author scien
+ * @author Alex Labbane
  *
  */
 public enum BedwarsArmor {
@@ -12,9 +12,15 @@ public enum BedwarsArmor {
 	DIAMOND (3);
 	private final int level;
 	
+	/**
+	 * Constructor
+	 * @param level	armor level
+	 */
 	private BedwarsArmor(int level) {
 		this.level = level;
 	}
+	
+	/************* Getters/Setters *************/
 	
 	public int getLevel() { return this.level; }
 }

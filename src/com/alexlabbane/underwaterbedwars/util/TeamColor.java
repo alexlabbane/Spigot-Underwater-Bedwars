@@ -2,6 +2,11 @@ package com.alexlabbane.underwaterbedwars.util;
 
 import org.bukkit.Color;
 
+/**
+ * Enum for team colors in a BedwarsGame
+ * @author Alex Labbane
+ *
+ */
 public enum TeamColor {
 	RED ("RED"),
 	BLUE ("BLUE"),
@@ -14,12 +19,22 @@ public enum TeamColor {
 	GRAY ("GRAY");
 	private final String colorString;
 	
+	/**
+	 * Constructor
+	 * @param colorString	the color of the team
+	 */
 	private TeamColor(String colorString) {
 		this.colorString = colorString;
 	}
 	
+	/************* Getters/Setters *************/
+	
 	public String getColor() { return this.colorString; }
-
+	
+	/**
+	 * Get the actual color associated with the team color name
+	 * @return	color of the team
+	 */
 	public Color RGB() {
 		if(this.colorString.equals("RED"))
 			return Color.fromRGB(11546150);

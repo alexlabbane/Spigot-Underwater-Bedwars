@@ -1,15 +1,24 @@
 package com.alexlabbane.underwaterbedwars.util;
 
+/**
+ * Custom queue used for traps bought by a BedwarsTeam
+ * @author Alex Labbane
+ *
+ */
 public class TrapQueue {
-	// Constants
-	public static final int MAX_NUM_TRAPS = 3;
-	
 	// Data members
 	private TeamTrap[] queue;
 	private int size;
 	private int front;
 	private int back;
 	
+	/************* Static members *************/
+
+	public static final int MAX_NUM_TRAPS = 3;
+	
+	/**
+	 * Create a new TrapQueue
+	 */
 	public TrapQueue() {
 		this.queue = new TeamTrap[MAX_NUM_TRAPS];
 		this.size = 0;
@@ -17,9 +26,15 @@ public class TrapQueue {
 		this.back = 0;
 	}
 	
+	/************* Getters/Setters *************/
+	
 	public int size() { return this.size; }
 	public boolean full() { return this.size >= MAX_NUM_TRAPS; }
 	
+	/**
+	 * Get the trap at the front of the queue
+	 * @return	the trap at the front of the queue; null if there is none
+	 */
 	public TeamTrap front() {
 		if(this.size == 0)
 			return null;
@@ -27,6 +42,11 @@ public class TrapQueue {
 		return this.queue[this.front];
 	}
 	
+	/**
+	 * Remove the trap at the front of the queue. Throws an
+	 * IndexOutOfBoundsException if queue is empty
+	 * @return	the trap that was removed
+	 */
 	public TeamTrap pop() {
 		if(this.size == 0)
 			throw new IndexOutOfBoundsException("Empty queue");
@@ -38,6 +58,11 @@ public class TrapQueue {
 		return front;
 	}
 	
+	/**
+	 * Push a new trap to the back of the queue. Does nothing
+	 * if the queue is full
+	 * @param newTrap	the trap to push
+	 */
 	public void push(TeamTrap newTrap) {
 		if(this.size >= MAX_NUM_TRAPS)
 			return;
@@ -48,9 +73,10 @@ public class TrapQueue {
 	}
 	
 	/**
-	 * Get the element in the i-th position in the queue
-	 * @param i
-	 * @return
+	 * Get the element in the i-th position in the queue. Throws
+	 * IndexOutOfBoundsException if there is no such trap
+	 * @param i		the index to get
+	 * @return		the trap at index i
 	 */
 	public TeamTrap getAtPosition(int i) {
 		if(i >= this.size)

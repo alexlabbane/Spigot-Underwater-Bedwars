@@ -24,15 +24,28 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import net.minecraft.server.v1_16_R2.NBTTagCompound;
 
+/**
+ * General utility class for useful BedwarsGame operations
+ * @author Alex Labbane
+ *
+ */
 public class Util {
 	public static Plugin plugin;
 	public static final int TICKS_PER_SECOND = 20;
+	
+	/************* Getters/Setters *************/
 	
 	public static void setPlugin(Plugin p) {
 		plugin = p;
 	}
 	
-	// String
+	/**
+	 * Add a string as persistent data to an ItemStack
+	 * @param item	ItemStack to attach data to
+	 * @param tag	tag name for the data
+	 * @param data	the data to attach
+	 * @return		the item with the data attached
+	 */
 	public static ItemStack addNBTTagString(ItemStack item, String tag, String data) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		ItemMeta itemMeta = item.getItemMeta();
@@ -42,6 +55,12 @@ public class Util {
 		return item;
 	}
 	
+	/**
+	 * Get a string attached as persistent data to an ItemStack
+	 * @param item	ItemStack to retrieve data from
+	 * @param tag	tag name for the data
+	 * @return		the attached data; empty string if there is none
+	 */
 	public static String getNBTTagString(ItemStack item, String tag) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		
@@ -52,6 +71,13 @@ public class Util {
 		return item.getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.STRING);
 	}
 	
+	/**
+	 * Add a string as persistent data to an Entity
+	 * @param entity	Entity to attach data to
+	 * @param tag		tag name for the data
+	 * @param data		the data to attach
+	 * @return			the entity with the data attached
+	 */
 	public static Entity addNBTTagString(Entity entity, String tag, String data) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		entity.getPersistentDataContainer().set(key, PersistentDataType.STRING, data);
@@ -59,6 +85,12 @@ public class Util {
 		return entity;
 	}
 	
+	/**
+	 * Get a string attached as persistent data to an Entity
+	 * @param entity	Entity to retrieve data from
+	 * @param tag		tag name for the data
+	 * @return			the attached data; empty string if there is none
+	 */
 	public static String getNBTTagString(Entity entity, String tag) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		
@@ -69,7 +101,13 @@ public class Util {
 		return entity.getPersistentDataContainer().get(key, PersistentDataType.STRING);
 	}
 	
-	// Boolean (0 or 1 int)
+	/**
+	 * Add a boolean (represented as an integer) as persistent data to an ItemStack
+	 * @param item	ItemStack to attach data to
+	 * @param tag	tag name for the data
+	 * @param data	the data to attach
+	 * @return		the item with the data attached
+	 */
 	public static ItemStack addNBTTagBoolean(ItemStack item, String tag, int data) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		ItemMeta itemMeta = item.getItemMeta();
@@ -79,6 +117,12 @@ public class Util {
 		return item;
 	}
 	
+	/**
+	 * Get a boolean (represented as an integer) attached as persistent data to an ItemStack
+	 * @param item	ItemStack to retrieve data from
+	 * @param tag	tag name for the data
+	 * @return		the attached data; 0 if there is none
+	 */
 	public static int getNBTTagBoolean(ItemStack item, String tag) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		try {
@@ -88,8 +132,13 @@ public class Util {
 		return item.getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.INTEGER);
 	}
 	
-	// Long
-	public static ItemStack addNBTTagLong(ItemStack item, String tag, long data) {
+	/**
+	 * Add a long as persistent data to an ItemStack
+	 * @param item	ItemStack to attach data to
+	 * @param tag	tag name for the data
+	 * @param data	the data to attach
+	 * @return		the item with the data attached
+	 */	public static ItemStack addNBTTagLong(ItemStack item, String tag, long data) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		ItemMeta itemMeta = item.getItemMeta();
 		itemMeta.getPersistentDataContainer().set(key, PersistentDataType.LONG, data);
@@ -98,6 +147,12 @@ public class Util {
 		return item;
 	}
 	
+	/**
+	 * Get a long attached as persistent data to an ItemStack
+	 * @param item	ItemStack to retrieve data from
+	 * @param tag	tag name for the data
+	 * @return		the attached data; 0 if there is none
+	 */
 	public static long getNBTTagLong(ItemStack item, String tag) {
 		NamespacedKey key = new NamespacedKey(plugin, tag);
 		try {
@@ -106,6 +161,11 @@ public class Util {
 		
 	}
 	
+	/**
+	 * Remove the AI from an Entity, preventing it from
+	 * moving or making any action
+	 * @param en	the entity to remove the AI from
+	 */
 	public static void freezeEntity(Entity en){
 	    net.minecraft.server.v1_16_R2.Entity nmsEn = ((CraftEntity) en).getHandle();
 	    NBTTagCompound compound = new NBTTagCompound();
@@ -113,7 +173,12 @@ public class Util {
 	    compound.setByte("NoAI", (byte) 1);
 	    nmsEn.load(compound);
 	}
-	  
+	
+	/**
+	 * Get the display name for a PotionEffectType
+	 * @param pet	the PotionEffectType to get the name for
+	 * @return		the display name for the PotionEffectType; "Undefined" is not specified
+	 */
 	public static String getCommonPotionName(PotionEffectType pet) {
 		switch(pet.getName()) {
 		case "SPEED":
@@ -130,10 +195,10 @@ public class Util {
 	/**
 	 * Counts the number of dropped items matching mat
 	 * in a radius r around the location
-	 * @param loc
-	 * @param mat
-	 * @param r
-	 * @return
+	 * @param loc	the location to count around
+	 * @param mat	the material to count
+	 * @param r		the search radius
+	 * @return		the number of items with the given material in the area
 	 */
 	public static int countDroppedItems(Location loc, Material mat, float r) {
 		Entity[] chunkEntities = loc.getChunk().getEntities();
@@ -153,7 +218,7 @@ public class Util {
 
 	/**
 	 * Spawn a red firework on the player
-	 * @param player
+	 * @param player	the player to spawn the firework on
 	 */
 	public static void spawnFirework(Player player) {
 		Location loc = player.getLocation();

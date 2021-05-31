@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Class to encompass enums for all of the upgradeable tools in Bedwars
  * This includes the pickaxe, axe, and shears
- * @author scien
+ * @author Alex Labbane
  */
 public class BedwarsTools {
 	
@@ -15,7 +15,7 @@ public class BedwarsTools {
 	 * Enum to define what level of pickaxe a player should have
 	 * getUpgrade() can be called when a player buys an upgraded one from the shop
 	 * getDowngrade() can be called when a player dies (and loses one level of upgrade)
-	 * @author scien
+	 * @author Alex Labbane
 	 */
 	public enum Pickaxe {
 		NONE (0),
@@ -25,9 +25,15 @@ public class BedwarsTools {
 		DIAMOND (4);
 		private final int level;
 		
+		/**
+		 * Constructor
+		 * @param level pickaxe level
+		 */
 		private Pickaxe(int level) {
 			this.level = level;
 		}
+		
+		/************* Getters/Setters *************/
 		
 		public int getLevel() { return this.level; }
 		
@@ -134,7 +140,7 @@ public class BedwarsTools {
 	 * Enum to define what level of axe a player should have
 	 * getUpgrade() can be called when a player buys an upgraded one from the shop
 	 * getDowngrade() can be called when a player dies (and loses one level of upgrade)
-	 * @author scien
+	 * @author Alex Labbane
 	 */
 	public enum Axe {
 		NONE (0),
@@ -144,9 +150,15 @@ public class BedwarsTools {
 		DIAMOND (4);
 		private final int level;
 		
+		/**
+		 * Constructor
+		 * @param level axe level
+		 */
 		private Axe(int level) {
 			this.level = level;
 		}
+		
+		/************* Getters/Setters *************/
 		
 		public int getLevel() { return this.level; }
 		
@@ -251,16 +263,22 @@ public class BedwarsTools {
 	
 	/**
 	 * Enum to define if a player has shears
-	 * @author scien
+	 * @author Alex Labbane
 	 */
 	public enum Shears {
 		NONE (0),
 		SHEARS (1);
 		private final int level;
 		
+		/**
+		 * Constructor
+		 * @param level shears level
+		 */
 		private Shears(int level) {
 			this.level = level;
 		}
+		
+		/************* Getters/Setters *************/
 		
 		public int getLevel() { return this.level; }
 		

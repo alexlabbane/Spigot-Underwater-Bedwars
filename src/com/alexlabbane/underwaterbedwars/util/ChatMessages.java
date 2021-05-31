@@ -8,14 +8,19 @@ import com.alexlabbane.underwaterbedwars.UnderwaterBedwars;
 
 import net.md_5.bungee.api.ChatColor;
 
-// TODO: Add custom death messages
+/**
+ * Color player names with their team color in chat messages
+ * Rest of message is colored white
+ * @author Alex Labbane
+ *
+ */
 public class ChatMessages {
 	
 	/**
 	 * Colors a chat message with player names
 	 * depending on their team color
-	 * @param chatMessage
-	 * @return colored chat message
+	 * @param chatMessage 	the message to color
+	 * @return 				colored chat message
 	 */
 	public static String getColoredChatMessage(String chatMessage) {
 		for(BedwarsTeam team : UnderwaterBedwars.game.getTeams()) {

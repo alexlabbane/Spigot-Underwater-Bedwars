@@ -13,6 +13,11 @@ import com.alexlabbane.underwaterbedwars.BedwarsTeam;
 
 import net.md_5.bungee.api.ChatColor;
 
+/**
+ * Enum used to define Bedwars traps
+ * @author Alex Labbane
+ *
+ */
 public enum TeamTrap {
 	BLINDNESS_SLOWNESS,
 	COUNTER_OFFENSIVE,
@@ -33,6 +38,11 @@ public enum TeamTrap {
 	private static final int MINER_FATIGUE_LEVEL = 0;
 	private static final int MINER_FATIGUE_DURATION = 20 * 10;
 	
+	/**
+	 * Get a trap by its name
+	 * @param name	the name of the trap to get
+	 * @return		the trap referenced by name
+	 */
 	public static TeamTrap getByName(String name) {
 		switch(name) {
 		case "BLINDNESS_SLOWNESS":
@@ -48,6 +58,10 @@ public enum TeamTrap {
 		return null;
 	}
 	
+	/**
+	 * Get the display material associated with the trap
+	 * @return	the display material
+	 */
 	public Material getDisplayMaterial() {
 		switch(this) {
 		case BLINDNESS_SLOWNESS:
@@ -63,6 +77,10 @@ public enum TeamTrap {
 		return null;
 	}
 	
+	/**
+	 * Get the textual name of a trap
+	 * @return	name of the trap
+	 */
 	public String getName() {
 		switch(this) {
 		case BLINDNESS_SLOWNESS:
@@ -81,25 +99,24 @@ public enum TeamTrap {
 	/**
 	 * Apply the trap effects to the relevant players
 	 * Warn defenders that a trap has been triggered
-	 * @param defenders
-	 * @param offender
+	 * @param defenders		the defending team
+	 * @param offender		the attacking team
 	 */
 	public void apply(BedwarsTeam defenders, BedwarsPlayer offender) {
 		for(BedwarsPlayer bwPlayer : defenders.getBedwarsPlayers()) {
 			bwPlayer.getPlayer().sendTitle("", ChatColor.RED + this.getName() + " triggered!", 0, 20 * 3, 0);
 			
-			// Play the alarm noise
+			// Play the alarm noise (16 times)
 			new BukkitRunnable() {
 				int count = 0;
 				
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
 					if(count >= 16)
 						this.cancel();
 					
 					float pitch = 1.8f;
-					if(count % 2 == 0)
+					if(count % 2 == 0) // Alternate pitch
 						pitch = 1.6f;
 					
 					bwPlayer.getPlayer().playSound(
@@ -126,6 +143,7 @@ public enum TeamTrap {
 					TeamTrap.BLINDNESS_DURATION,
 					TeamTrap.BLINDNESS_LEVEL));
 			break;
+			
 		case COUNTER_OFFENSIVE:
 			for(BedwarsPlayer bwPlayer : defenders.getBedwarsPlayers()) {
 				Player p = bwPlayer.getPlayer();
@@ -144,9 +162,11 @@ public enum TeamTrap {
 				}
 			}
 			break;
+			
 		case ALARM:
 			offender.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
 			break;
+			
 		case MINER_FATIGUE:
 			offender.getPlayer().addPotionEffect(new PotionEffect(
 					PotionEffectType.SLOW_DIGGING,
