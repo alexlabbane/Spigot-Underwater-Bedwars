@@ -15,6 +15,7 @@ import org.bukkit.util.Vector;
 import com.alexlabbane.underwaterbedwars.util.Util;
 
 import net.md_5.bungee.api.ChatColor;
+import world.ChunkManager;
 
 /**
  * Represents game resource generators (i.e. diamonds, emeralds)
@@ -126,6 +127,9 @@ public class GameGen {
 	public void initialize() {
 		this.stopGen();		
 
+		// Force load the chunk gen
+		ChunkManager.registerChunk(this.genLocation.getChunk());
+		
 		this.genTask = new BukkitRunnable() {
 			int tickCounter = 0;
 
@@ -157,6 +161,9 @@ public class GameGen {
 	 * to start spawning resources again using {@link #initialize()}
 	 */
 	public void stopGen() {
+		// Make sure the chunk for the old gen is not force loaded
+		ChunkManager.unregisterChunk(this.genLocation.getChunk());
+		
 		if(this.genTask != null) {
 			this.genTask.cancel();
 		}

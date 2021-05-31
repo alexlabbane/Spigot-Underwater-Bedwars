@@ -54,6 +54,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_16_R2.EntityThrownTrident;
+import world.ChunkManager;
 
 /**
  * Represents a team in a BedwarsGame. Most listeners to player actions are also implemented here
@@ -334,8 +335,10 @@ public class BedwarsTeam implements Listener {
 	 * Separated from GameGen class (only used for game wide gens such as diamonds/emeralds)
 	 */
 	public void initializeGen() {
-	this.stopGen();
+		this.stopGen();
 		
+		ChunkManager.registerChunk(this.genLocation.getChunk());
+	
 		this.genSpawner = new BukkitRunnable() {
 			int counter = 0;
 			
@@ -381,6 +384,8 @@ public class BedwarsTeam implements Listener {
 	 * Stop the team generator from making resources. Destroys the task in charge of the generator.
 	 */
 	public void stopGen() {
+		ChunkManager.unregisterChunk(this.genLocation.getChunk());
+		
 		if(this.genSpawner != null)
 			this.genSpawner.cancel();	
 	}
