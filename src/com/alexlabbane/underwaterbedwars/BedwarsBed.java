@@ -98,7 +98,8 @@ public class BedwarsBed implements Listener {
 	
 	
 	/**
-	 * Creates the bed block in the world and sets it to not broken
+	 * Creates the bed block in the world and sets it to not broken.
+	 * Also adds basic wool defense.
 	 */
 	public void set() {
 		this.broken = false;
@@ -119,7 +120,7 @@ public class BedwarsBed implements Listener {
 	        if(this.footLocation == null)
 	        	this.footLocation = start.getLocation();
 	    }
-	    
+
 	    // All beds start with wool around them
 	    BlockFace[] neighborFaces = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
 	    for(BlockFace blockFace : neighborFaces) {
