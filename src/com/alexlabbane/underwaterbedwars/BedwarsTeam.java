@@ -249,6 +249,8 @@ public class BedwarsTeam implements Listener {
 		itemShopLocation.setPitch((float)this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.pitch"));
 		itemShopLocation.setYaw((float)this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.yaw"));
 		this.itemShopVillager = itemShopLocation.getWorld().spawnEntity(itemShopLocation, EntityType.VILLAGER);
+		this.itemShopVillager.setCustomName(ChatColor.YELLOW + ChatColor.BOLD.toString() + "ITEM SHOP");
+		this.itemShopVillager.setCustomNameVisible(true);
 		this.setItemShopLocation(itemShopLocation);
 		
 		this.itemShopVillager.setSilent(true);
@@ -268,6 +270,8 @@ public class BedwarsTeam implements Listener {
 		teamShopLocation.setPitch((float)this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.pitch"));
 		teamShopLocation.setYaw((float)this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.yaw"));
 		this.teamShopVillager = teamShopLocation.getWorld().spawnEntity(teamShopLocation, EntityType.VILLAGER);
+		this.teamShopVillager.setCustomName(ChatColor.YELLOW + ChatColor.BOLD.toString() + "TEAM UPGRADES");
+		this.teamShopVillager.setCustomNameVisible(true);
 		this.setTeamShopLocation(teamShopLocation);
 		
 		this.teamShopVillager.setSilent(true);

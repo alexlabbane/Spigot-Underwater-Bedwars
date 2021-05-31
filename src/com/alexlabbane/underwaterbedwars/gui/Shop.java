@@ -109,7 +109,6 @@ public abstract class Shop implements Listener {
 		// String that stores purchase information for the item
 		String shopCostString = matName + "," + amount + "," + payMatName + "," + payAmount + ",0"; // ",0 at end is for 0 enchantments
 		
-		Bukkit.getServer().getLogger().log(Level.WARNING, shopCostString);
 		Util.addNBTTagString(item, "ShopCost", shopCostString); // Add string of meta info to the item
 
 		return item;
@@ -135,7 +134,6 @@ public abstract class Shop implements Listener {
 		// ",0," used to make sure ShopItem class knows there are no enchants
 		String shopCostString = "POTION_" + potionEffectName + "," + 1 + "," + payMatName + "," + payAmount + ",0," + level + "," + durationTicks;
 		
-		Bukkit.getServer().getLogger().log(Level.WARNING, shopCostString);
 		Util.addNBTTagString(item, "ShopCost", shopCostString); // Add string of meta info to the item
 		
 		return item;
@@ -167,7 +165,6 @@ public abstract class Shop implements Listener {
 			shopCostString += "," + le.getEnchantment().getName() + "," + le.getLevel();
 		}
 		
-		Bukkit.getServer().getLogger().log(Level.WARNING, shopCostString);
 		Util.addNBTTagString(item, "ShopCost", shopCostString); // Add string of meta info to the item
 		
 		return item;
