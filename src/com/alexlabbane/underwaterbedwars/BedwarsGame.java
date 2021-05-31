@@ -147,6 +147,7 @@ public class BedwarsGame {
 							player.setGameMode(GameMode.SURVIVAL);
 							player.sendTitle(ChatColor.GREEN + "Start!", "", 0, 20, 0);
 							player.setHealth(player.getAttribute(Attribute.GENERIC_MAX_HEALTH).getDefaultValue());
+							player.setFoodLevel(20);
 							for(PotionEffect pe : player.getActivePotionEffects()) {
 								player.removePotionEffect(pe.getType());
 							}

@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import com.alexlabbane.underwaterbedwars.listeners.BlockListener;
+import com.alexlabbane.underwaterbedwars.listeners.HungerListener;
 import com.alexlabbane.underwaterbedwars.listeners.PlayerItemDamageListener;
 import com.alexlabbane.underwaterbedwars.listeners.PlayerMoveArmorListener;
 import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
@@ -46,6 +47,7 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	getServer().getPluginManager().registerEvents(new PlayerItemDamageListener(), this);
     	getServer().getPluginManager().registerEvents(new PlayerMoveArmorListener(), this);
     	getServer().getPluginManager().registerEvents(new BlockListener(), this);
+    	getServer().getPluginManager().registerEvents(new HungerListener(), this);
     }
     
     // Fired when plugin is disabled
@@ -81,7 +83,8 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     			WaterListener.toggle();
     			Bukkit.broadcastMessage(ChatColor.YELLOW + "Toggled water flow.");
     		} else if(args[0].equals("map_edit")) {
-    			this.game.toggleMapEdit();
+    			game.toggleMapEdit();
+    			Bukkit.broadcastMessage("Map editable: " + game.mapIsEditable());
     		}
     	} else if(label.equals("setitemshoplocation") && sender instanceof Player) {
     		//getServer().broadcastMessage("Color is " + args[0]);
