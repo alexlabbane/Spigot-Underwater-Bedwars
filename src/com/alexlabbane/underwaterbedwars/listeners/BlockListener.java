@@ -75,6 +75,19 @@ public class BlockListener implements Listener {
 	}
 	
 	/**
+	 * Set a block as placed by a player/not placed by a player
+	 * @param block				the block to set
+	 * @param placedByPlayer	whether or not it should be set as placed by a player
+	 */
+	public static void setBlockPlacedByPlayer(Block block, boolean placedByPlayer) {
+		if(placedByPlayer) {
+			placedBlocks.add(block);
+		} else {
+			placedBlocks.remove(block);
+		}
+	}
+	
+	/**
 	 * Determine if a given block was placed by an entity or not
 	 * @param b		the block to check
 	 * @return		true if the block was placed by an entity

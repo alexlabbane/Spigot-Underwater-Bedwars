@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import com.alexlabbane.underwaterbedwars.listeners.BlockListener;
 import com.alexlabbane.underwaterbedwars.util.ChatMessages;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.TeamTrap;
@@ -117,6 +118,24 @@ public class BedwarsBed implements Listener {
 	        // Only sets the foot location one time
 	        if(this.footLocation == null)
 	        	this.footLocation = start.getLocation();
+	    }
+	    
+	    // All beds start with wool around them
+	    BlockFace[] neighborFaces = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
+	    for(BlockFace blockFace : neighborFaces) {
+		    Block neighbor = this.footLocation.getBlock().getRelative(blockFace);
+		    
+		    if(neighbor.getType() == Material.AIR) {
+		    	neighbor.setType(Material.getMaterial(this.bedColor.getColor() + "_WOOL"));
+		    	BlockListener.setBlockPlacedByPlayer(neighbor, true);
+		    }
+		    
+		    neighbor = this.headLocation.getBlock().getRelative(blockFace);
+		    
+		    if(neighbor.getType() == Material.AIR) {
+		    	neighbor.setType(Material.getMaterial(this.bedColor.getColor() + "_WOOL"));
+		    	BlockListener.setBlockPlacedByPlayer(neighbor, true);
+		    }
 	    }
 	}
 	
