@@ -1,11 +1,7 @@
 package com.alexlabbane.underwaterbedwars.shoputil;
 
-import java.util.ArrayList;
-
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.potion.PotionEffectType;
 
-import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.Util;
 
 /**

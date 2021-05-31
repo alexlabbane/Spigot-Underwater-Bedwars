@@ -1,21 +1,17 @@
 package com.alexlabbane.underwaterbedwars;
-import java.lang.System.Logger;
 import java.util.List;
 import java.util.logging.Level;
 
-import org.apache.logging.log4j.io.LoggerBufferedInputStream;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import com.alexlabbane.underwaterbedwars.gui.ItemShop;
 import com.alexlabbane.underwaterbedwars.listeners.BlockListener;
 import com.alexlabbane.underwaterbedwars.listeners.PlayerItemDamageListener;
 import com.alexlabbane.underwaterbedwars.listeners.PlayerMoveArmorListener;

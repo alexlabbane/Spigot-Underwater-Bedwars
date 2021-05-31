@@ -1,7 +1,6 @@
 package com.alexlabbane.underwaterbedwars;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import org.bukkit.Bukkit;
@@ -23,7 +22,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import com.alexlabbane.underwaterbedwars.util.BedwarsArmor;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
-import com.alexlabbane.underwaterbedwars.util.Util;
 import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
@@ -127,6 +125,8 @@ public class BedwarsPlayer {
 			finishedArmor.set(0, new ItemStack(Material.DIAMOND_BOOTS));
 			finishedArmor.set(1, new ItemStack(Material.DIAMOND_LEGGINGS));
 			break;
+		default:
+			break;
 		}
 		
 		// Add protection
@@ -196,6 +196,8 @@ public class BedwarsPlayer {
 			pickaxe.addEnchantment(Enchantment.DIG_SPEED, 3);
 			inv.addItem(pickaxe);
 			break;
+		default:
+			break;
 		}
 		
 		ItemStack axe;
@@ -220,6 +222,8 @@ public class BedwarsPlayer {
 			axe = new ItemStack(Material.DIAMOND_AXE);
 			axe.addEnchantment(Enchantment.DIG_SPEED, 3);
 			inv.addItem(axe);
+			break;
+		default:
 			break;
 		}
 		

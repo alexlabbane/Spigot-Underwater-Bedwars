@@ -2,7 +2,6 @@ package com.alexlabbane.underwaterbedwars.gui;
 
 import java.util.HashMap;
 
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
@@ -122,6 +121,8 @@ public class ItemShop extends Shop implements Listener {
 				break;
 			case DIAMOND:
 				this.inv.setItem(22, this.createSpecialShopItem("SPECIAL_DIAMOND_PICKAXE", 1, "Buy Diamond Pickaxe (6 gold)", 6, "GOLD_INGOT"));
+				break;
+			default:
 				break;
 			}
 		}

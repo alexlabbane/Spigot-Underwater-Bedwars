@@ -2,7 +2,6 @@ package com.alexlabbane.underwaterbedwars.listeners;
 
 import java.util.HashSet;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;

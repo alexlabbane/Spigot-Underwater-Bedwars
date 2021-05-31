@@ -60,6 +60,8 @@ public class ToolShop extends ItemShop implements Listener {
 			case DIAMOND:
 				this.inv.setItem(invSlot, this.createSpecialShopItem("SPECIAL_DIAMOND_PICKAXE", 1, "Buy Diamond Pickaxe (6 gold)", 6, "GOLD_INGOT"));
 				break;
+			default:
+				break;
 			}
 			
 			invSlot++;
@@ -77,6 +79,8 @@ public class ToolShop extends ItemShop implements Listener {
 				break;
 			case DIAMOND:
 				this.inv.setItem(invSlot, this.createSpecialShopItem("SPECIAL_DIAMOND_AXE", 1, "Buy Diamond Axe (6 gold)", 6, "GOLD_INGOT"));
+				break;
+			default:
 				break;
 			}
 		}

@@ -100,6 +100,8 @@ public class BedwarsTools {
 				return "GOLDEN_PICKAXE";
 			case DIAMOND:
 				return "DIAMOND_PICKAXE";
+			default:
+				break;
 			}
 			
 			return null;
@@ -129,6 +131,8 @@ public class BedwarsTools {
 				break;
 			case DIAMOND:
 				newPickaxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+				break;
+			default:
 				break;
 			}
 			
@@ -225,6 +229,8 @@ public class BedwarsTools {
 				return "GOLDEN_AXE";
 			case DIAMOND:
 				return "DIAMOND_AXE";
+			default:
+				break;
 			}
 			
 			return null;
@@ -254,6 +260,8 @@ public class BedwarsTools {
 				break;
 			case DIAMOND:
 				newAxe.addEnchantment(Enchantment.DIG_SPEED, 3);
+				break;
+			default:
 				break;
 			}
 			

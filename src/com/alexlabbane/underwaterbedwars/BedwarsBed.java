@@ -228,7 +228,7 @@ public class BedwarsBed implements Listener {
 		
 		// TODO: Check if player has magic milk active
 		
-		if(bwPlayer != null && (true || bwPlayer.getTeam().getColor() != this.bedColor)) {
+		if(bwPlayer != null && bwPlayer.getTeam().getColor() != this.bedColor) {
 			// If player not on same team as bed, check if we need to trigger a trap!
 			if(this.team != null && this.team.getQueuedTraps().size() > 0) {
 				// There is a queued trap, so we apply it

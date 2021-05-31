@@ -1,11 +1,9 @@
 package com.alexlabbane.underwaterbedwars.gui;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
-import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
 
 /**
  * Shop inventory for utility related items

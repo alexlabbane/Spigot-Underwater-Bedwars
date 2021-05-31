@@ -2,7 +2,6 @@ package com.alexlabbane.underwaterbedwars.util;
 
 import java.util.Random;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;

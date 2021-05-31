@@ -3,7 +3,6 @@ package com.alexlabbane.underwaterbedwars;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -16,7 +15,6 @@ import org.bukkit.util.Vector;
 import com.alexlabbane.underwaterbedwars.util.Util;
 
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_16_R2.EntityArmorStand;
 
 /**
  * Represents game resource generators (i.e. diamonds, emeralds)
