@@ -2,6 +2,7 @@ package com.alexlabbane.underwaterbedwars;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -154,6 +155,71 @@ public class BedwarsPlayer {
 		inv.setLeggings(finishedArmor.get(1));
 		inv.setChestplate(finishedArmor.get(2));
 		inv.setHelmet(finishedArmor.get(3));
+	}
+	
+	/**
+	 * Test if a player has a base trident in their inventory
+	 * @return	true if the player has a base level trident
+	 */
+	public boolean hasBaseTrident() {
+		if(this.getBaseTrident() == null) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Get a base level trident in the player inventory
+	 * @return	the base level trident; null if none exists
+	 */
+	public ItemStack getBaseTrident() {
+		Inventory inv = this.player.getInventory();
+		
+		// Scan for base level trident
+		for(ItemStack itemStack : inv.getContents()) {
+			if(itemStack != null 
+					&& itemStack.getType() == Material.TRIDENT
+					&& itemStack.containsEnchantment(Enchantment.LOYALTY)
+					&& itemStack.getEnchantmentLevel(Enchantment.LOYALTY) == 1)
+			{
+				return itemStack;
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Test if a player has a base trident in their inventory
+	 * @return	true if the player has a base level trident
+	 */
+	public boolean hasUpgradedTrident() {
+		if(this.getUpgradedTrident() == null) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Get an upgraded trident in the player inventory
+	 * @return	the upgraded trident; null if none exists
+	 */
+	public ItemStack getUpgradedTrident() {
+		Inventory inv = this.player.getInventory();
+		
+		// Scan for base level trident
+		for(ItemStack itemStack : inv.getContents()) {
+			if(itemStack != null 
+					&& itemStack.getType() == Material.TRIDENT
+					&& itemStack.getEnchantmentLevel(Enchantment.LOYALTY) != 1)
+			{
+				return itemStack;
+			}
+		}
+		
+		return null;
 	}
 	
 	/**

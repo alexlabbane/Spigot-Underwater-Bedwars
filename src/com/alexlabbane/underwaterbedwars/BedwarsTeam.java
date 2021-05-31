@@ -1,6 +1,7 @@
 package com.alexlabbane.underwaterbedwars;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -8,19 +9,28 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftTrident;
+import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.Trident;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerPickupArrowEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -43,7 +53,14 @@ import com.alexlabbane.underwaterbedwars.util.Util;
 import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_16_R2.EntityThrownTrident;
 
+/**
+ * Represents a team in a BedwarsGame. Most listeners to player actions are also implemented here
+ * rather than in the BedwarsPlayer class.
+ * @author Alex Labbane
+ *
+ */
 public class BedwarsTeam implements Listener {
 	private Plugin plugin;
 	private BedwarsGame game;
@@ -571,6 +588,142 @@ public class BedwarsTeam implements Listener {
 			}
 		}
 		
+	}
+	
+	/**
+	 * Make sure a player always has at least a base level trident in their inventory.
+	 * Do not allow players to drop a base level trident. Some bugs can probably
+	 * be caused by throwing the trident and then buying a second one.
+	 * @param e	the event being handled
+	 */
+	@EventHandler
+	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		Player player = e.getPlayer();
+		ItemStack droppedItem = e.getItemDrop().getItemStack();
+		Inventory playerInventory = player.getInventory();
+		
+		// Only handle events for players on this team
+		if(!this.hasPlayer(player)) {
+			return;
+		}
+		
+		BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(player);
+		
+		// Handle dropping base level trident
+		if(droppedItem.getType() == Material.TRIDENT 
+				&& droppedItem.containsEnchantment(Enchantment.LOYALTY) 
+				&& droppedItem.getEnchantmentLevel(Enchantment.LOYALTY) == 1) 
+		{
+				e.setCancelled(true);
+		}
+		
+		// Handle dropping non-base level trident
+		if(droppedItem.getType() == Material.TRIDENT
+				&& droppedItem.getEnchantmentLevel(Enchantment.LOYALTY) != 1)
+		{	
+			// Give player base trident if they threw their last one
+			if(!bwPlayer.hasBaseTrident()
+					&& !bwPlayer.hasUpgradedTrident()) 
+			{
+				ItemStack baseTrident = new ItemStack(Material.TRIDENT);
+				baseTrident.addEnchantment(Enchantment.LOYALTY, 1);
+				playerInventory.addItem(baseTrident);
+			}
+		}
+			
+	}
+	
+	/**
+	 * Remove base level trident from a player if they get
+	 * another trident
+	 * @param e	the event being handled
+	 */
+	@EventHandler
+	public void onPlayerGetItem(EntityPickupItemEvent e) {
+		Entity entity = e.getEntity();
+		Player player = null;
+		
+		if(entity instanceof Player) {
+			player = (Player)entity;
+		} else {
+			return;
+		}
+		
+		Inventory playerInventory = player.getInventory();
+		
+		// Only handle events for players on this team
+		if(!this.hasPlayer(player)) {
+			return;
+		}
+		
+		ItemStack item = e.getItem().getItemStack();
+		
+		// If player picked up a trident (not base level)
+		if(item.getType() == Material.TRIDENT
+				&& item.getEnchantmentLevel(Enchantment.LOYALTY) != 1) 
+		{
+			// Remove all base tridents
+			BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(player);
+			while(bwPlayer.hasBaseTrident()) {			
+				ItemStack baseTrident = bwPlayer.getBaseTrident();
+				playerInventory.remove(baseTrident);
+			}
+		} 
+	}
+	
+	/**
+	 * Prevent a player from having a base level trident return
+	 * to them if they already have another trident in inventory.
+	 * Also remove base level trident from inventory if a player
+	 * has a non-base trident return to them
+	 * @param e	event being handled
+	 */
+	@EventHandler
+	public void tridentReturnToPlayer(PlayerPickupArrowEvent e) {
+		Player player = e.getPlayer();
+		Inventory playerInventory = player.getInventory();
+
+		// Only handle events for players on this team
+		if(!this.hasPlayer(player)) {
+			return;
+		}
+		
+		AbstractArrow projectile = e.getArrow();
+		Trident trident = null;
+		
+		if(projectile instanceof Trident) {
+			trident = (Trident)projectile;
+		} else {
+			return;
+		}
+		
+		// Get the itemstack associated with trident entity with NMS
+		EntityThrownTrident thrownTrident = ((CraftTrident) trident).getHandle();
+		ItemStack tridentItemStack = CraftItemStack.asBukkitCopy(thrownTrident.trident);
+		BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(player);
+		
+		// If a base trident returned
+		if(tridentItemStack.getType() == Material.TRIDENT
+				&& tridentItemStack.getEnchantmentLevel(Enchantment.LOYALTY) == 1)
+		{
+			// If player has another trident, cancel the event and delete the trident being picked up
+			if(bwPlayer.hasBaseTrident() 
+					|| bwPlayer.hasUpgradedTrident()) 
+			{
+				trident.remove();
+				e.setCancelled(true);	
+			}
+		} 
+		// If upgraded trident returned, remove all base tridents
+		else if(tridentItemStack.getType() == Material.TRIDENT
+				&& tridentItemStack.getEnchantmentLevel(Enchantment.LOYALTY) != 1)
+		{
+			// Remove all base tridents
+			while(bwPlayer.hasBaseTrident()) {			
+				ItemStack baseTrident = bwPlayer.getBaseTrident();
+				playerInventory.remove(baseTrident);
+			}
+		}
 	}
 	
 	/**
