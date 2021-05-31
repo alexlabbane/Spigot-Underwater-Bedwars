@@ -5,7 +5,7 @@ import java.util.HashSet;
 import org.bukkit.Chunk;
 
 public class ChunkManager {
-	private static HashSet<Chunk> forceLoadedChunks;
+	private static HashSet<Chunk> forceLoadedChunks = new HashSet<Chunk>();
 	
 	/**
 	 * Mark a chunk to be force loaded by the server

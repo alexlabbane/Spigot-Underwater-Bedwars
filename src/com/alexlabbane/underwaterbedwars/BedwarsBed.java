@@ -222,6 +222,10 @@ public class BedwarsBed implements Listener {
 		
 		BedwarsPlayer bwPlayer = UnderwaterBedwars.game.getBedwarsPlayer(e.getPlayer());
 		
+		if(bwPlayer == null) {
+			return;
+		}
+		
 		// Check if player already has trap applied
 		if(this.trappedPlayers.contains(bwPlayer))
 			return;
