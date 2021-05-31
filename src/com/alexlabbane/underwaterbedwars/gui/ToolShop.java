@@ -6,11 +6,25 @@ import org.bukkit.event.Listener;
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.util.BedwarsTools;
 
+/**
+ * Shop inventory for tool related items
+ * @author Alex Labbane
+ *
+ */
 public class ToolShop extends ItemShop implements Listener {	
+	/**
+	 * Create a new tool shop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public ToolShop(String color, BedwarsGame game) {
 		super(color, game, "Tools");
 	}
 
+	/**
+	 * Initialize all of the items/link that should be in the shop
+	 * @param player	the player to create the shop for
+	 */
 	@Override
 	public void initializeItems(Player player) {
 		// Create links to other shop pages

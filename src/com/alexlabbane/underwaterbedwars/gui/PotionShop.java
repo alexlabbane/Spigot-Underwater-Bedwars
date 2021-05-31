@@ -7,11 +7,25 @@ import org.bukkit.event.Listener;
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
 
+/**
+ * Shop inventory for potion related items
+ * @author Alex Labbane
+ *
+ */
 public class PotionShop extends ItemShop implements Listener {	
+	/**
+	 * Create a new potion shop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public PotionShop(String color, BedwarsGame game) {
 		super(color, game, "Blocks");
 	}
 
+	/**
+	 * Initialize all of the items/links that should be in the shop
+	 * @param player	the player to create the shop for
+	 */
 	@Override
 	public void initializeItems(Player player) {
 		// Create links to other shop pages

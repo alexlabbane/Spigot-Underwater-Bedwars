@@ -18,17 +18,50 @@ import com.alexlabbane.underwaterbedwars.util.Util;
 
 import net.md_5.bungee.api.ChatColor;
 
+/**
+ * Class for the team upgrade GUI
+ * Different pages represented by different classes for team shop (and inherit from here)
+ * Items are placed in the shop to "link" to other shop pages
+ * 
+ * Two different kinds of items will exist in the shop GUI
+ * Shop Items are items that can be purchased (i.e. armor upgrades, haste, etc.)
+ * Link Items are items in the shop that link to another shop GUI (which is opened on click)
+ * @author Alex Labbane
+ *
+ */
 public class TeamShop extends Shop implements Listener {
+	/**
+	 * Create a new TeamShop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public TeamShop(String color, BedwarsGame game) {
 		super(45, game, "Upgrades & Traps");
 		this.initializeItems(null);
 	}
 	
+	/**
+	 * Create a new TeamShop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 * @param title		custom shop title
+	 */
 	public TeamShop(String color, BedwarsGame game, String title) {
 		super(45, game, title);
 		this.initializeItems(null);
 	}
 	
+	/**
+	 * Creates a team item to be placed in the shop
+	 * @param matName		the name of the material to be displayed in the shop GUI
+	 * @param amount		the amount of the material to be displayed in the shop GUI
+	 * @param displayName	the name of the item to be displayed in the shop GUI
+	 * @param upgradeName	the name of the team upgrade being purchased, as defined in TeamUpgrade
+	 * @param payAmount		the amount of the pay material to be required
+	 * @param payMatName	the material used to pay for the item
+	 * @return				the item to show in the shop
+	 * @see com.alexlabbane.underwaterbedwars.util.TeamUpgrade
+	 */
 	protected ItemStack createTeamShopItem(final String matName, int amount, final String displayName, final String upgradeName, int payAmount, final String payMatName) {
 		final ItemStack item = new ItemStack(Material.getMaterial(matName), amount);
 		final ItemMeta meta = item.getItemMeta();
@@ -42,6 +75,10 @@ public class TeamShop extends Shop implements Listener {
 		return item;
 	}
 	
+	/**
+	 * Initialize all of the items/links that should be in the shop
+	 * @param player	the player to create the shop for
+	 */
 	@Override
 	public void initializeItems(Player player) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
@@ -139,7 +176,13 @@ public class TeamShop extends Shop implements Listener {
 		}
 
 	}
-
+	
+	/**
+	 * Handle attempted transactions in the shop, which are further handled with
+	 * {@link #handleTeamUpgrade(Player, ShopItem, TeamUpgrade)}
+	 * @param player			the player attempting to make the transaction
+	 * @param shopCostString	the string in the item metadata that determines shop item parameters
+	 */
 	@Override
 	public void handleTransaction(Player player, String shopCostString) {
 		if(this.bedwarsGame.hasTeam(player)) {
@@ -158,6 +201,9 @@ public class TeamShop extends Shop implements Listener {
 		player.updateInventory();
 	}
 	
+	/**
+	 * Handle links to other shops. Any new shop that should be accessible via links must be added here.
+	 */
 	@Override
 	public void handleLink(Player player, String shopLinkString) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
@@ -187,6 +233,13 @@ public class TeamShop extends Shop implements Listener {
 			newShop.openInventory((HumanEntity)player);
 	}
 	
+	/**
+	 * Handles team upgrade transactions
+	 * @param player		the player making the transaction
+	 * @param shopItem		the object representing the purchased upgrade
+	 * @param upgradeType	the type of upgrade purchased
+	 * @see com.alexlabbane.underwaterbedwars.util.TeamUpgrade
+	 */
 	private void handleTeamUpgrade(Player player, ShopItem shopItem, TeamUpgrade upgradeType) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
 
@@ -246,6 +299,10 @@ public class TeamShop extends Shop implements Listener {
 		}
 	}
 	
+	/**
+	 * Open the shop GUI for the player
+	 * @param ent	the human entity to open the inventory for (i.e. player who clicked on the shop)
+	 */
 	@Override
 	public void openInventory(final HumanEntity ent) {
 		if(ent instanceof Player) {

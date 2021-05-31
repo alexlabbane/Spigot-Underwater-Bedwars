@@ -10,11 +10,25 @@ import com.alexlabbane.underwaterbedwars.BedwarsTeam;
 import com.alexlabbane.underwaterbedwars.listeners.WaterListener;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 
+/**
+ * Shop inventory for melee related items
+ * @author Alex Labbane
+ *
+ */
 public class MeleeShop extends ItemShop implements Listener {	
+	/**
+	 * Create a new melee shop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public MeleeShop(String color, BedwarsGame game) {
 		super(color, game, "Melee");
 	}
 
+	/**
+	 * Initialize all of the items/links that should be in the shop
+	 * @param player	the player to create the shop for
+	 */
 	@Override
 	public void initializeItems(Player player) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);

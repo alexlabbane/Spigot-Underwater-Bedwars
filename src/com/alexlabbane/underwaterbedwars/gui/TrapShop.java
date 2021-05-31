@@ -10,15 +10,35 @@ import com.alexlabbane.underwaterbedwars.util.TeamTrap;
 
 import net.md_5.bungee.api.ChatColor;
 
+/**
+ * Shop inventory for all trap team upgrades
+ * @author Alex Labbane
+ *
+ */
 public class TrapShop extends TeamShop {
+	/**
+	 * Create a new trap shop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public TrapShop(String color, BedwarsGame game) {
 		super(color, game, "Queue a trap");
 	}
 	
+	/**
+	 * Create a new trap shop with a custom title
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 * @param title		the custom title for the shop
+	 */
 	public TrapShop(String color, BedwarsGame game, String title) {
 		super(color, game, title);
 	}	
 	
+	/**
+	 * Initialize all of the items/links that should be in the shop
+	 * @param player	the player to create the shop for
+	 */
 	@Override
 	public void initializeItems(Player player) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
@@ -44,6 +64,12 @@ public class TrapShop extends TeamShop {
 		this.inv.setItem(22, this.createShopLink("ARROW", 1, ChatColor.GREEN + "Go back", "SHOP_TEAM", team.getColor().name()));
 	}	
 	
+	/**
+	 * Handle attempted transactions in the shop (attempts to queue a trap), which are then further
+	 * handled with {@link #handleTrapQueue(Player, ShopItem, TeamTrap)}
+	 * @param player			the player attempting to make the transaction
+	 * @param shopCostString	the string in the item metadata the determines shop item parameters
+	 */
 	@Override
 	public void handleTransaction(Player player, String shopCostString) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
@@ -64,6 +90,13 @@ public class TrapShop extends TeamShop {
 		}
 	}
 	
+	/**
+	 * Place a purchased trap in the team's trap queue
+	 * @param player	the player who purchased the trap
+	 * @param shopItem	the object representing the purchased trap
+	 * @param trapType	the type of trap purchased
+	 * @see com.alexlabbane.underwaterbedwars.util.TeamTrap
+	 */
 	private void handleTrapQueue(Player player, ShopItem shopItem, TeamTrap trapType) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
 		

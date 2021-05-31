@@ -25,37 +25,56 @@ import net.md_5.bungee.api.ChatColor;
 
 /**
  * Class for Quick Buy GUI (i.e. the main item shop)
- * Different pages will be represented by different classes (and will inherit from this class)
+ * Different pages represented by different classes (and inherit from this class)
  * Items will be placed in the shop to "link" to different pages
  * 
- * Two different kinds of items will exist in the shop GUI
- * Shop Items are items that can be purchased (i.e. wool, armor upgrades, etc)
- * Link Items are items in the shop that link to another shop GUI (which is opened on click)
- * @author scien
+	 * Two different kinds of items will exist in the shop GUI
+	 * Shop Items are items that can be purchased (i.e. wool, armor upgrades, etc)
+	 * Link Items are items in the shop that link to another shop GUI (which is opened on click)
+ * @author Alex Labbane
  *
  */
 public class ItemShop extends Shop implements Listener {
 	protected String color;
 	
+	/**
+	 * Create a new ItemShop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public ItemShop(String color, BedwarsGame game) {
 		super(54, game, "Quick Buy");
 		this.color = color;
 		this.initializeItems(null);
 	}
 	
+	/**
+	 * Create a new ItemShop
+	 * @param color		the color of the team the shop is for
+	 * @param game		reference to the game the shop is a part of
+	 * @param title		a custom title for the shop
+	 */
 	public ItemShop(String color, BedwarsGame game, String title) {
 		super(54, game, title);
 		this.color = color;
 		this.initializeItems(null);
 	}
 	
-	// Copy constructor
+	/**
+	 * Copy constructor for ItemShop
+	 * @param color		the color of the team the shop is for
+	 * @param itemShop	the ItemShop to copy
+	 */
 	public ItemShop(String color, ItemShop itemShop) {
 		super(54, itemShop.getGame(), itemShop.getTitle());
 		this.color = color;
 		this.initializeItems(null);
 	}
 	
+	/**
+	 * Initialize all of the items/links that should be in the shop
+	 * @param player	the player to create the shop for
+	 */
 	@Override
 	public void initializeItems(Player player) {
 		BedwarsTeam team = this.bedwarsGame.getTeam(player);
@@ -120,6 +139,9 @@ public class ItemShop extends Shop implements Listener {
 		this.inv.setItem(34, this.createShopItem("WATER_BUCKET", 1, "Buy Water Bucket (3 gold)", 3, "GOLD_INGOT"));
 	}
 	
+	/**
+	 * Handle links to other shops. Any new shop that should be accessible via links must be added here.
+	 */
 	@Override
 	public void handleLink(Player player, String shopLinkString) {
 		if(this.bedwarsGame.hasTeam(player)) {
@@ -161,6 +183,13 @@ public class ItemShop extends Shop implements Listener {
 		}
 	}
 	
+	/**
+	 * Handle attempted transactions in the shop, including any special transactions,
+	 * which are further handled with {@link #handlePotionTransaction(Player, String)}
+	 * and {@link #handleSpecialTransaction(Player, String)}
+	 * @param player			the player attempting to make the transaction
+	 * @param shopCostString	the string in the item metadata that determines shop item parameters
+	 */
 	@Override
 	public void handleTransaction(Player player, String shopCostString) {
 		if(this.bedwarsGame.hasTeam(player)) {			
@@ -205,8 +234,8 @@ public class ItemShop extends Shop implements Listener {
 	 * Assumes player can already afford item
 	 * Applies potion effect and uses ShopPotion class instead of ShopItem
 	 * to parse shopCostString
-	 * @param player
-	 * @param shopCostString
+	 * @param player			the player attempting to make the transaction
+	 * @param shopCostString	the string in the item metadata that determines shop item parameters
 	 */
 	private void handlePotionTransaction(Player player, String shopCostString) {
 		ShopPotion shopPotion = new ShopPotion(shopCostString);
@@ -234,8 +263,8 @@ public class ItemShop extends Shop implements Listener {
 	/**
 	 * Handles special transactions (i.e. armor purchases)
 	 * Assumes player can already afford item
-	 * @param player
-	 * @param shopCostString
+	 * @param player			the player attempting to make the transaction
+	 * @param shopCostString	the string in the item metadata that determines shop item parameters
 	 */
 	private void handleSpecialTransaction(Player player, String shopCostString) {
 		ShopItem shopItem = new ShopItem(shopCostString);

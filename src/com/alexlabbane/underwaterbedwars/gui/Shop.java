@@ -22,11 +22,22 @@ import com.alexlabbane.underwaterbedwars.BedwarsGame;
 import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.Util;
 
+/**
+ * Abstract class used to define a shop GUI. Defines all minimum requirements required
+ * to be a shop.
+ * @author Alex Labbane
+ *
+ */
 public abstract class Shop implements Listener {
 	protected final BedwarsGame bedwarsGame;
 	protected final Inventory inv;
 	protected final String title;
 	
+	/**
+	 * Create a new shop
+	 * @param shopSize	the number of spaces in the shop GUI
+	 * @param game		reference to the game the shop is a part of
+	 */
 	public Shop(int shopSize, BedwarsGame game) {
 		this.bedwarsGame = game;
 		this.title = "Item Shop";
@@ -34,6 +45,12 @@ public abstract class Shop implements Listener {
     	Bukkit.getServer().getPluginManager().registerEvents(this, this.bedwarsGame.getPlugin());
 	}
 	
+	/**
+	 * Create a new shop with a custom title
+	 * @param shopSize		the number of spaces in the shop GUI
+	 * @param game			reference to the game the shop is a part of
+	 * @param shopTitle		custom title for the shop
+	 */
 	public Shop(int shopSize, BedwarsGame game, String shopTitle) {
 		this.bedwarsGame = game;
 		this.inv = Bukkit.createInventory(null, shopSize, shopTitle);
@@ -41,8 +58,12 @@ public abstract class Shop implements Listener {
     	Bukkit.getServer().getPluginManager().registerEvents(this, this.bedwarsGame.getPlugin());
 	}
 	
+	/************* Getters/Setters *************/
+
 	public BedwarsGame getGame() { return this.bedwarsGame; }
 	public String getTitle() { return this.title; }
+	
+	/************* Abstract methods *************/
 	
 	public abstract void initializeItems(Player player);
 	public abstract void handleTransaction(Player player, String shopCostString);
@@ -52,13 +73,13 @@ public abstract class Shop implements Listener {
 	 * Create an item to place in the shop
 	 * This creates the item that appears in the actual shop inventory
 	 * For special kinds of purchases (i.e. armor upgrades), a material name
-	 * prefixed with "SPECIAL_" can be used
-	 * @param matName
-	 * @param amount
-	 * @param name
-	 * @param payAmount
-	 * @param payMatName
-	 * @return the item to show in the shop
+	 * prefixed with "SPECIAL_" can be used with {@link #createSpecialShopItem(String, int, String, int, String)}
+	 * @param matName		the name of the material to be displayed in the shop GUI
+	 * @param amount		the amount of the material to be displayed in the shop GUI
+	 * @param name			the name of the item to be displayed in the shop GUI
+	 * @param payAmount		the amount of the pay material to be required
+	 * @param payMatName	the material used to pay for the item
+	 * @return 				the item to show in the shop
 	 */
 	protected ItemStack createShopItem(final String matName, int amount, final String name, int payAmount, final String payMatName) {
 		final ItemStack item = this.createEnchantedShopItem(matName, amount, name, payAmount, payMatName, new LeveledEnchantment[] {});
@@ -71,13 +92,12 @@ public abstract class Shop implements Listener {
 	 * This creates the item that appears in the actual shop inventory
 	 * For special kinds of purchases (i.e. armor upgrades), a material name
 	 * prefixed with "SPECIAL_" can be used
-	 * @param matName
-	 * @param amount
-	 * @param name
-	 * @param payAmount
-	 * @param payMatName
-	 * @param enchantments
-	 * @return the item to show in the shop
+	 * @param matName		the name of the material to be displayed in the shop GUI
+	 * @param amount		the amount of the material to be displayed in the shop GUI
+	 * @param name			the name of the item to be displayed in the shop GUI
+	 * @param payAmount		the amount of the pay material to be required
+	 * @param payMatName	the material used to pay for the item
+	 * @return 				the item to show in the shop
 	 */
 	protected ItemStack createSpecialShopItem(final String matName, int amount, final String name, int payAmount, final String payMatName) {
 		String displayMatName = matName.replace("SPECIAL_", ""); // Remove "SPECIAL_" to generate display item
@@ -96,6 +116,16 @@ public abstract class Shop implements Listener {
 		return item;
 	}
 	
+	/**
+	 * Create a purchasable potion to be placed in the shop
+	 * @param potionEffectName	the name of the potion effect
+	 * @param level				the level of potion effect to be applied
+	 * @param durationTicks		the number of ticks the potion should be active for
+	 * @param name				the name of the item to be displayed in the shop GUI
+	 * @param payAmount			the amount of the pay material to be required
+	 * @param payMatName		the material used to pay for the item
+	 * @return					the item to be shown in the shop
+	 */
 	protected ItemStack createPotionShopItem(final String potionEffectName, int level, int durationTicks, final String name, int payAmount, final String payMatName) { 
 		final ItemStack item = new ItemStack(Material.POTION);
 		final ItemMeta meta = item.getItemMeta();
@@ -117,13 +147,13 @@ public abstract class Shop implements Listener {
 	 * This creates the item that appears in the actual shop inventory
 	 * For special kinds of purchases (i.e. armor upgrades), a material name
 	 * prefixed with "SPECIAL_" can be used
-	 * @param matName
-	 * @param amount
-	 * @param name
-	 * @param payAmount
-	 * @param payMatName
-	 * @param enchantments
-	 * @return the item to show in the shop
+	 * @param matName		the name of the material to be displayed in the shop GUI
+	 * @param amount		the amount of the material to be displayed in the shop GUI
+	 * @param name			the name of the item to be displayed in the shop GUI
+	 * @param payAmount		the amount of the pay material to be required
+	 * @param payMatName	the material used to pay for the item
+	 * @param enchantments	the list of enchantments to be applied to the item
+	 * @return 				the item to show in the shop
 	 */
 	protected ItemStack createEnchantedShopItem(final String matName, int amount, final String name, int payAmount, final String payMatName, LeveledEnchantment[] enchantments) {
 		final ItemStack item = new ItemStack(Material.getMaterial(matName), amount);
@@ -148,12 +178,12 @@ public abstract class Shop implements Listener {
 	 * Creates a link to another shop
 	 * When this item is clicked on, it should open a new shop GUI for the linked shop
 	 * Shop to link to denoted by shopName
-	 * @param matName
-	 * @param amount
-	 * @param name the display name of the link
-	 * @param shopName
-	 * @param color
-	 * @return the item to show in the shop
+	 * @param matName		the name of the material to be displayed in the shop GUI
+	 * @param amount		the amount of the material to be displayed in the shop GUI
+	 * @param name 			the display name of the link
+	 * @param shopName		the name of the shop to link to as used by {@link #handleLink(Player, String)}
+	 * @param color			the color of shop that the linked shop should create
+	 * @return 				the item to show in the shop
 	 */
 	protected ItemStack createShopLink(final String matName, int amount, final String name,  final String shopName, final String color) {
 		final ItemStack item = new ItemStack(Material.getMaterial(matName));
@@ -168,12 +198,21 @@ public abstract class Shop implements Listener {
 		return item;
 	}
 	
+	/**
+	 * Cancel any attempt to move items in the shop GUI
+	 * @param e	the event being handled
+	 */
 	@EventHandler
 	public void onInventoryDrag(InventoryDragEvent e) {
 		if(e.getInventory() == inv)
 			e.setCancelled(true);
 	}
 	
+	/**
+	 * When a shop item is clicked on, make sure it is not picked up.
+	 * Handle as a transaction or link as applicable.
+	 * @param e	the event being handled
+	 */
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
 		Player player = null;
@@ -200,6 +239,10 @@ public abstract class Shop implements Listener {
 		
 	}
 	
+	/**
+	 * Open the shop GUI for the player
+	 * @param ent	the human entity to open the inventory for (i.e. player who clicked on the shop)
+	 */
 	public void openInventory(final HumanEntity ent) {
 		ent.openInventory(this.inv);
 	}	
