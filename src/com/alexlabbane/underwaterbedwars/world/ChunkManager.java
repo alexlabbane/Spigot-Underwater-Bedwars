@@ -1,4 +1,4 @@
-package world;
+package com.alexlabbane.underwaterbedwars.world;
 
 import java.util.HashSet;
 

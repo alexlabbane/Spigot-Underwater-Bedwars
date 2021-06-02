@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
@@ -40,6 +41,7 @@ public class BedwarsGame {
 	/************* Static members *************/
 	
 	private static ArrayList<BedwarsGame> activeGames = new ArrayList<BedwarsGame>(); // Allows all games to be accessed in static context from anywhere
+	private static Material[] currencies = new Material[] { Material.IRON_INGOT, Material.GOLD_INGOT, Material.DIAMOND, Material.EMERALD };
 	private static int nextID = 0;
 	
 	/**
@@ -64,6 +66,10 @@ public class BedwarsGame {
 	public ArrayList<BedwarsTeam> getTeams() { return this.teams; }
 	public boolean mapIsEditable() { return this.mapEdit; }
 	public void toggleMapEdit() { this.mapEdit = !this.mapEdit; }
+	
+	// Static getters/setters
+	
+	public static Material[] getCurrentcies() { return currencies; }
 	
 	/**
 	 * Reset all elements of the game. Does not start the next game (i.e. all gens/upgrades are paused)

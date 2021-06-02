@@ -13,9 +13,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import com.alexlabbane.underwaterbedwars.util.Util;
+import com.alexlabbane.underwaterbedwars.world.ChunkManager;
 
 import net.md_5.bungee.api.ChatColor;
-import world.ChunkManager;
 
 /**
  * Represents game resource generators (i.e. diamonds, emeralds)

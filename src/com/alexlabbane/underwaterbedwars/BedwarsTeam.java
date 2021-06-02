@@ -1,6 +1,7 @@
 package com.alexlabbane.underwaterbedwars;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.bukkit.Bukkit;
@@ -17,6 +18,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Trident;
@@ -50,11 +52,12 @@ import com.alexlabbane.underwaterbedwars.util.LeveledEnchantment;
 import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.TrapQueue;
 import com.alexlabbane.underwaterbedwars.util.Util;
+import com.alexlabbane.underwaterbedwars.world.ChunkManager;
+
 import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_16_R2.EntityThrownTrident;
-import world.ChunkManager;
 
 /**
  * Represents a team in a BedwarsGame. Most listeners to player actions are also implemented here
@@ -515,6 +518,30 @@ public class BedwarsTeam implements Listener {
 			// Downgrade tools
 			bwPlayer.downgradeAxe();
 			bwPlayer.downgradePickaxe();
+			
+			// Transfer resources to killer
+			LivingEntity killer = p.getKiller();
+			Player killingPlayer = null;
+			
+			if(killer instanceof Player) {
+				killingPlayer = (Player)killer;
+			}
+			
+			if(killingPlayer != null) {
+				BedwarsPlayer killingBedwarsPlayer = this.game.getBedwarsPlayer(killingPlayer);
+				
+				if(killingBedwarsPlayer != null) {
+					HashMap<Material, Integer> transferred = bwPlayer.transferCurrency(killingBedwarsPlayer);
+					
+					for(Material transferredMaterial : transferred.keySet()) {
+						if(transferred.get(transferredMaterial) > 0) {
+							killingPlayer.sendMessage(
+									ChatColor.YELLOW + "+" + transferred.get(transferredMaterial) + " " + transferredMaterial.name());	
+						}
+					}
+				}
+			}
+			
 			
 			// Respawn player immediately in spectator (1 tick delay)
 			new BukkitRunnable() {

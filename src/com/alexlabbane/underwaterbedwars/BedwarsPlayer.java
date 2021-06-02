@@ -2,6 +2,7 @@ package com.alexlabbane.underwaterbedwars;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.bukkit.Bukkit;
@@ -477,6 +478,37 @@ public class BedwarsPlayer {
 		}
 	}
 
+	public HashMap<Material, Integer> transferCurrency(BedwarsPlayer receivingPlayer) {
+		Material[] currencies = BedwarsGame.getCurrentcies();
+		HashMap<Material, Integer> amountTransferred = new HashMap<Material, Integer>();
+		
+		for(Material currency : currencies) {
+			// Start counter at 0 for each currency
+			amountTransferred.put(currency, 0);
+			
+			// Count amount of currency in players inventory
+			for(ItemStack itemStack : this.player.getInventory().getContents()) {
+				if(itemStack == null) {
+					continue;
+				}
+				
+				if(itemStack.getType() == currency) {
+					// Add amount of currency found to counter
+					amountTransferred.replace(
+							currency,
+							amountTransferred.get(currency) + itemStack.getAmount());
+				}
+			}
+			
+			// Actually put the items in their inventory
+			receivingPlayer.getPlayer().getInventory().addItem(new ItemStack(
+					currency,
+					amountTransferred.get(currency)));
+		}		
+		
+		return amountTransferred;
+	}
+	
 	/**
 	 * Redraw the scoreboard for the player
 	 */
