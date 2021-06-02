@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftTrident;
@@ -529,16 +530,23 @@ public class BedwarsTeam implements Listener {
 			
 			if(killingPlayer != null) {
 				BedwarsPlayer killingBedwarsPlayer = this.game.getBedwarsPlayer(killingPlayer);
+				boolean resourcesTransferred = false;
 				
 				if(killingBedwarsPlayer != null) {
 					HashMap<Material, Integer> transferred = bwPlayer.transferCurrency(killingBedwarsPlayer);
 					
 					for(Material transferredMaterial : transferred.keySet()) {
 						if(transferred.get(transferredMaterial) > 0) {
+							resourcesTransferred = true;
 							killingPlayer.sendMessage(
 									ChatColor.YELLOW + "+" + transferred.get(transferredMaterial) + " " + transferredMaterial.name());	
 						}
 					}
+				}
+				
+				// Play sound
+				if(resourcesTransferred) {
+					p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
 				}
 			}
 			

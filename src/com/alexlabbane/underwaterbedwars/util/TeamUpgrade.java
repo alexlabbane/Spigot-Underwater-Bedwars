@@ -32,5 +32,26 @@ public enum TeamUpgrade {
 		}
 		
 		return null;
-	}	
+	}
+	
+	/**
+	 * Get the common name for a team upgrade
+	 * @return	The common name for an upgrade; "Undefined" if it does not exist
+	 */
+	public String getCommonName() {
+		switch(this) {
+		case IMPALING:
+			return "Sharpness";
+		case PROTECTION:
+			return "Protection";
+		case HASTE:
+			return "Haste";
+		case FORGE:
+			return "Forge Upgrade";
+		case HEAL_POOL:
+			return "Heal Pool";
+		}
+		
+		return "Undefined";
+	}
 }

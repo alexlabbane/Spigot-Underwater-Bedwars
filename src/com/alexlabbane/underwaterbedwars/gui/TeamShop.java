@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.alexlabbane.underwaterbedwars.BedwarsGame;
+import com.alexlabbane.underwaterbedwars.BedwarsPlayer;
 import com.alexlabbane.underwaterbedwars.BedwarsTeam;
 import com.alexlabbane.underwaterbedwars.shoputil.ShopItem;
 import com.alexlabbane.underwaterbedwars.util.TeamUpgrade;
@@ -190,6 +191,28 @@ public class TeamShop extends Shop implements Listener {
 			if(shopItem.canPlayerAfford(player)) {
 				TeamUpgrade upgradeType = TeamUpgrade.getByName(shopItem.getMatName());
 				this.handleTeamUpgrade(player, shopItem, upgradeType);
+				
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 2.0f);
+				player.sendMessage(ChatColor.GREEN + "You bought " + 
+						upgradeType.getCommonName() + " for " + 
+						ChatColor.YELLOW + shopItem.getPayAmount() + "x " + 
+						shopItem.getPayMatName() + ".");
+				
+				// Notify team members as well
+				BedwarsPlayer bwPlayer = this.bedwarsGame.getBedwarsPlayer(player);
+				
+				if(bwPlayer != null) {
+					for(Player teamMember : bwPlayer.getTeam().getPlayers()) {
+						if(teamMember != player) {
+							teamMember.sendMessage(ChatColor.GREEN + player.getName() +  " bought " + 
+									upgradeType.getCommonName() + " for " + 
+									ChatColor.YELLOW + shopItem.getPayAmount() + "x " + 
+									shopItem.getPayMatName() + ".");
+						}
+					}
+				}
+				
+				
 			} else if(shopItem.getPayAmount() > 0) {
 				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
 				player.sendMessage(ChatColor.RED + "You can't afford this upgrade!");
