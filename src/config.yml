@@ -88,6 +88,16 @@ teams:
       z: 9.5
       pitch: 0
       yaw: -90
+    chest-location:
+      x: -3.5
+      y: 43.0
+      z: 6.5
+      block-face: WEST
+    ender-chest-location:
+      x: -3.5
+      y: 43.0
+      z: 12.5
+      block-face: WEST
     
   pink-team:
     color: PINK

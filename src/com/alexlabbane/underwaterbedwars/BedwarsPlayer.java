@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -221,6 +222,20 @@ public class BedwarsPlayer {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Drops the contents of the player's ender chest
+	 * into their team's gen
+	 */
+	public void releaseEnderChestMaterials() {
+		ItemStack[] enderChestContents = this.player.getEnderChest().getContents();		
+		
+		Location loc = this.team.getGenLocation();
+		for(ItemStack itemStack : enderChestContents) {
+			loc.getWorld().dropItem(loc, itemStack);
+			this.player.getEnderChest().remove(itemStack);
+		}		
 	}
 	
 	/**

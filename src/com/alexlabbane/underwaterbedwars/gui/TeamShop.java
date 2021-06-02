@@ -205,9 +205,7 @@ public class TeamShop extends Shop implements Listener {
 					for(Player teamMember : bwPlayer.getTeam().getPlayers()) {
 						if(teamMember != player) {
 							teamMember.sendMessage(ChatColor.GREEN + player.getName() +  " bought " + 
-									upgradeType.getCommonName() + " for " + 
-									ChatColor.YELLOW + shopItem.getPayAmount() + "x " + 
-									shopItem.getPayMatName() + ".");
+									ChatColor.YELLOW + upgradeType.getCommonName());
 						}
 					}
 				}

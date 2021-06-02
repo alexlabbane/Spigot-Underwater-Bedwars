@@ -9,6 +9,11 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftTrident;
@@ -26,11 +31,13 @@ import org.bukkit.entity.Trident;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.Inventory;
@@ -54,7 +61,7 @@ import com.alexlabbane.underwaterbedwars.util.TeamColor;
 import com.alexlabbane.underwaterbedwars.util.TrapQueue;
 import com.alexlabbane.underwaterbedwars.util.Util;
 import com.alexlabbane.underwaterbedwars.world.ChunkManager;
-
+import com.alexlabbane.underwaterbedwars.world.WorldUtil;
 import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
@@ -110,8 +117,8 @@ public class BedwarsTeam implements Listener {
 	private BedwarsBed bed;
 	
 	// Other important locations
-	private Location chestLocation;
-	private Location enderChestLocation;
+	private Block chest;
+	private Block enderChest;
 	private Location spawnLocation;
 	
 	/**
@@ -154,6 +161,7 @@ public class BedwarsTeam implements Listener {
 	public ArrayList<Pair<Material, LeveledEnchantment[]>> getStarterArmor() { return this.starterArmor; }
 	public void setItemShopLocation(Location loc) { this.setShopLocation("ITEM", loc, this.itemShopVillager); }
 	public void setTeamShopLocation(Location loc) {	this.setShopLocation("TEAM", loc, this.teamShopVillager); }
+	public Location getGenLocation() { return this.genLocation; }
 	public void setGenLocation(Location loc) { this.genLocation = loc; }
 	
 	public ArrayList<BedwarsPlayer> getBedwarsPlayers() { return this.bwPlayers; }
@@ -290,6 +298,40 @@ public class BedwarsTeam implements Listener {
 				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.x"),
 				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.y"),
 				this.plugin.getConfig().getDouble(this.configPath + ".gen-location.z")));
+		
+		// Initialize chest + ender chest
+		Location chestLocation = new Location(
+				Bukkit.getServer().getWorlds().get(0),
+				this.plugin.getConfig().getDouble(this.configPath + ".chest-location.x"),
+				this.plugin.getConfig().getDouble(this.configPath + ".chest-location.y"),
+				this.plugin.getConfig().getDouble(this.configPath + ".chest-location.z"));
+		
+		chestLocation.getBlock().setType(Material.CHEST);
+		this.chest = chestLocation.getBlock();
+		BlockData chestData = this.chest.getBlockData();
+		
+		if(chestData instanceof Directional) {
+			((Directional) chestData).setFacing(BlockFace.valueOf(this.plugin.getConfig().getString(this.configPath + ".chest-location.block-face")));
+		}
+		
+		this.chest.setBlockData(chestData);
+		this.chest = chestLocation.getBlock();
+		
+		Location enderChestLocation = new Location(
+				Bukkit.getServer().getWorlds().get(0),
+				this.plugin.getConfig().getDouble(this.configPath + ".ender-chest-location.x"),
+				this.plugin.getConfig().getDouble(this.configPath + ".ender-chest-location.y"),
+				this.plugin.getConfig().getDouble(this.configPath + ".ender-chest-location.z"));
+		
+		enderChestLocation.getBlock().setType(Material.ENDER_CHEST);
+		this.enderChest = enderChestLocation.getBlock();
+		BlockData enderChestData = this.enderChest.getBlockData();
+		
+		if(enderChestData instanceof Directional) {
+			((Directional) enderChestData).setFacing(BlockFace.valueOf(this.plugin.getConfig().getString(this.configPath + ".ender-chest-location.block-face")));
+		}
+		
+		this.enderChest.setBlockData(enderChestData);
 		
 		// Give players all starter armor/tools
 		this.starterMaterials = new ArrayList<Pair<Material, LeveledEnchantment[]>>();
@@ -502,6 +544,40 @@ public class BedwarsTeam implements Listener {
 	}	
 	
 	/**
+	 * Get the number of players still in the game for this tema
+	 * @return	the number of players in the game on this team
+	 */
+	public int numAlivePlayers() {
+		int count = 0;
+		
+		for(BedwarsPlayer bwPlayer : this.getBedwarsPlayers()) {
+			if(bwPlayer.isStillAlive()) {
+				count++;
+			}
+		}
+		
+		return count;
+	}
+	
+	/**
+	 * Make sure a base trident can never be dropped
+	 * @param e
+	 */
+	@EventHandler
+	public void dropTrident(EntityDropItemEvent e) {
+		ItemStack drop = e.getItemDrop().getItemStack();
+		
+		if(drop != null 
+				&& drop.getType() == Material.TRIDENT
+				&& drop.containsEnchantment(Enchantment.LOYALTY)
+				&& drop.getEnchantmentLevel(Enchantment.LOYALTY) == 1)
+		{
+			// Cancel drop of a base level trident
+			e.getItemDrop().remove();
+		}
+	}
+	
+	/**
 	 * Handle death of a player on this team
 	 * @param e	the player death event being handled
 	 */
@@ -564,6 +640,7 @@ public class BedwarsTeam implements Listener {
 			if(this.bed.isBroken()) {
 				e.setDeathMessage(e.getDeathMessage() + ChatColor.AQUA + ChatColor.BOLD.toString() + " FINAL KILL!");
 				bwPlayer.setStillAlive(false);
+				bwPlayer.releaseEnderChestMaterials();
 				this.game.updateScoreboards();
 				return;
 			}
@@ -811,6 +888,34 @@ public class BedwarsTeam implements Listener {
 		} else if (entity == this.teamShopVillager) {
 			// Players open the same instance of the team shop
 			this.game.getTeam(p).teamShop.openInventory((HumanEntity)p);
+		}
+	}
+	
+	/**
+	 * Prevent players from other teams from opening team chest
+	 * @param e	the event being handled
+	 */
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent e) {	
+		if(!WorldUtil.sameLocation(e.getClickedBlock(), chest)) {
+			// Make sure the interacted block is this team's chest
+			return;
+		}
+
+		Player player = e.getPlayer();
+		BedwarsPlayer bwPlayer = this.game.getBedwarsPlayer(player);
+		
+		if(bwPlayer != null) {
+			BedwarsTeam team = bwPlayer.getTeam();
+			
+			if(team == this || (this.getBed().isBroken() && this.numAlivePlayers() == 0)) {
+				// Do not cancel the event
+				return;
+			}
+			
+			player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
+			player.sendMessage(ChatColor.RED + "Not all players on this team are dead!");
+			e.setCancelled(true);
 		}
 	}
 }

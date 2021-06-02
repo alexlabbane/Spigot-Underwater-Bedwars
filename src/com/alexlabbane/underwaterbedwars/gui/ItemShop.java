@@ -225,6 +225,21 @@ public class ItemShop extends Shop implements Listener {
 			}
 		}
 		
+		// Make sure player does not have a base level trident & an upgraded trident after purchase
+		BedwarsPlayer bwPlayer = this.bedwarsGame.getBedwarsPlayer(player);
+		if(bwPlayer != null) {
+			if(bwPlayer.hasUpgradedTrident() && bwPlayer.hasBaseTrident()) {
+				while(bwPlayer.hasBaseTrident()) {
+					bwPlayer.getPlayer().getInventory().remove(bwPlayer.getBaseTrident());
+				}
+				
+				// Move upgraded trident to first available inventory slot
+				ItemStack upgradedTrident = bwPlayer.getUpgradedTrident();
+				bwPlayer.getPlayer().getInventory().remove(upgradedTrident);
+				bwPlayer.getPlayer().getInventory().addItem(upgradedTrident);
+			}
+		}
+		
 		// Refresh the shop
 		this.initializeItems(player);
 		player.updateInventory();
