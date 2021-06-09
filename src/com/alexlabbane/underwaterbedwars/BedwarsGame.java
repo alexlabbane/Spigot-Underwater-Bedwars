@@ -67,6 +67,17 @@ public class BedwarsGame {
 	public boolean mapIsEditable() { return this.mapEdit; }
 	public void toggleMapEdit() { this.mapEdit = !this.mapEdit; }
 	
+	public ArrayList<Player> getPlayers() {
+		ArrayList<Player> players = new ArrayList<Player>();
+		for(BedwarsTeam team : this.teams) {
+			for(Player player : team.getPlayers()) {
+				players.add(player);
+			}
+		}
+		
+		return players;
+	}
+	
 	// Static getters/setters
 	
 	public static Material[] getCurrentcies() { return currencies; }

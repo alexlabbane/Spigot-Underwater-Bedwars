@@ -121,6 +121,8 @@ public class BedwarsTeam implements Listener {
 	private Block enderChest;
 	private Location spawnLocation;
 	
+	private static final double GEN_SPLIT_RADIUS = 2;
+	
 	/**
 	 * Create a new BedwarsTeam
 	 * @param players		a prepopulated list of players to add to the team
@@ -383,6 +385,7 @@ public class BedwarsTeam implements Listener {
 	/**
 	 * Initialize base gen for the team. Cancels any existing gen first.
 	 * Separated from GameGen class (only used for game wide gens such as diamonds/emeralds)
+	 * Allow "splitting" of iron and gold between multiple players
 	 */
 	public void initializeGen() {
 		this.stopGen();
@@ -399,6 +402,7 @@ public class BedwarsTeam implements Listener {
 				}
 				
 				ItemStack iron = new ItemStack(Material.IRON_INGOT);
+				Util.addNBTTagString(iron, "source", "team_gen");
 				
 				if(Util.countDroppedItems(genLocation, iron.getType(), 1.5f) < 48) {
 					Item droppedIron = genLocation.getWorld().dropItem(genLocation, iron);
@@ -408,6 +412,7 @@ public class BedwarsTeam implements Listener {
 				if(counter % 4 == 0) {
 					// Spawn gold 1/4 as often as iron
 					ItemStack gold = new ItemStack(Material.GOLD_INGOT);
+					Util.addNBTTagString(gold, "source", "team_gen");
 					
 					if(Util.countDroppedItems(genLocation, gold.getType(), 1.5f) < 16) {
 						Item droppedGold = genLocation.getWorld().dropItem(genLocation, gold);
@@ -843,6 +848,50 @@ public class BedwarsTeam implements Listener {
 			while(bwPlayer.hasBaseTrident()) {			
 				ItemStack baseTrident = bwPlayer.getBaseTrident();
 				playerInventory.remove(baseTrident);
+			}
+		}
+	}
+	
+	/**
+	 * Allow players to "split" items in the team gen
+	 * if they are both near the gen when the items are picked up.
+	 * An abritrary number of players can all split
+	 * @param e the event being handled
+	 */
+	@EventHandler
+	public void onGenPickup(EntityPickupItemEvent e) {
+		LivingEntity entity = e.getEntity();
+		ItemStack pickedUpItem = e.getItem().getItemStack();
+		
+		// Only for players
+		if(!(entity instanceof Player)) {
+			return;
+		}
+		
+		Player player = (Player)entity;
+		
+		// Only handle players on this team
+		if(this.game.getBedwarsPlayer(player).getTeam() != this) {
+			return;
+		}
+		
+		// To split, source must be from team gen
+		if(!Util.getNBTTagString(pickedUpItem, "source").equals("team_gen")) {
+			return;
+		}
+		
+		// So that the itemstack can never be split again
+		Util.removeNBTTag(pickedUpItem, "source");		
+
+		// Give to other players in appropriate radius
+		for(BedwarsPlayer otherBwPlayer : this.getBedwarsPlayers()) {
+			Player otherPlayer = otherBwPlayer.getPlayer();
+			if(otherPlayer == player) {
+				return;
+			}
+			
+			if(WorldUtil.getPlayerDistanceSquared(player, otherPlayer) < GEN_SPLIT_RADIUS * GEN_SPLIT_RADIUS) {
+				otherBwPlayer.giveItem(new ItemStack(pickedUpItem));
 			}
 		}
 	}

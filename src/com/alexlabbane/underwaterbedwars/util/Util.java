@@ -2,6 +2,7 @@ package com.alexlabbane.underwaterbedwars.util;
 
 import java.util.Random;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
@@ -158,6 +160,36 @@ public class Util {
 			return item.getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.LONG);
 		} catch (NullPointerException e) { return 0; }
 		
+	}
+	
+	/**
+	 * Remove data attached as persistent data to an ItemStack
+	 * @param item	ItemStack to remove data from
+	 * @param tag	the tag for the data to remove
+	 */
+	public static void removeNBTTag(ItemStack item, String tag) {
+		NamespacedKey key = new NamespacedKey(plugin, tag);
+		ItemMeta meta = item.getItemMeta();
+		PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
+		
+		try {
+			dataContainer.remove(key);
+			item.setItemMeta(meta);
+		} catch(NullPointerException e) { return; }
+	}
+	
+	/**
+	 * Remove data attached as persistent data to an Entity
+	 * @param entity	Entity to remove data from
+	 * @param tag		the tag for the data to remove
+	 */
+	public static void removeNBTTag(Entity entity, String tag) {
+		NamespacedKey key = new NamespacedKey(plugin, tag);
+		PersistentDataContainer dataContainer = entity.getPersistentDataContainer();
+		
+		try {
+			dataContainer.remove(key);
+		} catch(NullPointerException e) { return; }
 	}
 	
 	/**

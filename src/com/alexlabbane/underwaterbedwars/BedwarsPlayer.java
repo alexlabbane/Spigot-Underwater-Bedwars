@@ -225,6 +225,14 @@ public class BedwarsPlayer {
 	}
 	
 	/**
+	 * Add an ItemStack to a player's inventory
+	 * @param item	the ItemStack to add
+	 */
+	public void giveItem(ItemStack item) {
+		this.player.getInventory().addItem(item);
+	}
+	
+	/**
 	 * Drops the contents of the player's ender chest
 	 * into their team's gen
 	 */

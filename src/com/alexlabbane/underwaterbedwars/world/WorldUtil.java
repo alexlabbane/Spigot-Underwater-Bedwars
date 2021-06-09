@@ -2,6 +2,7 @@ package com.alexlabbane.underwaterbedwars.world;
 
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 
 /**
  * Utility functions relating to the world (i.e. locations, dimensions, etc)
@@ -39,5 +40,25 @@ public class WorldUtil {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Get the squared distance between two players
+	 * @param p1		the first player
+	 * @param p2		the second player
+	 * @return double	the squared distance between p1 and p2
+	 */
+	public static double getPlayerDistanceSquared(Player p1, Player p2) {
+		return p1.getLocation().distanceSquared(p2.getLocation());
+	}
+	
+	/**
+	 * Get the distance between two players
+	 * @param p1		the first player
+	 * @param p2		the second player
+	 * @return double	the distance between p1 and p2
+	 */
+	public static double getPlayerDistance(Player p1, Player p2) {
+		return p1.getLocation().distance(p2.getLocation());
 	}
 }
