@@ -1,5 +1,6 @@
 package com.alexlabbane.underwaterbedwars.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -30,6 +31,7 @@ public class WaterListener implements Listener {
 	 */
 	public static void toggle() {
 		WaterListener.enabled = !WaterListener.enabled;
+		Bukkit.broadcastMessage("Water flow enabled? " + WaterListener.enabled);
 	}
 	
 	/**
