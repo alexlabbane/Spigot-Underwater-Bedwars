@@ -18,7 +18,11 @@ public class WorldUtil {
 	 * @return		true if the blocks are at the same location
 	 */
 	public static boolean sameLocation(Block b1, Block b2) {
-		if(approxEqual(b1.getLocation(), b2.getLocation())) {
+		if(b1 == null || b2 == null) {
+			return false;
+		}
+		
+		if(b1.getWorld() == b2.getWorld() && approxEqual(b1.getLocation(), b2.getLocation())) {
 			return true;
 		}
 		

@@ -1,4 +1,5 @@
 game:
+  world-name: underwater_bedwars_map
   game-level:
     level-1:
       delay-ticks: 6000

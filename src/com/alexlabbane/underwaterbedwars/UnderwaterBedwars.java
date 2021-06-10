@@ -27,7 +27,7 @@ import com.alexlabbane.underwaterbedwars.util.Util;
  */
 public class UnderwaterBedwars extends JavaPlugin implements Listener {
 	
-	// Dangerous: allows anybody to access/alter game object
+	// Dangerous: allows anybody to access/alter game object; set in BedwarsGame constructor
 	public static BedwarsGame game;
 	
     /**
@@ -39,7 +39,7 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     	Util.setPlugin(this);
     	this.saveDefaultConfig();
     	
-    	game = new BedwarsGame(this);
+    	new BedwarsGame(this);
     	
     	getServer().getLogger().log(Level.WARNING, "Underwater Bedwars is enabled!");
     	getServer().getPluginManager().registerEvents(this, this);

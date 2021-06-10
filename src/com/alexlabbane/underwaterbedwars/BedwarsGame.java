@@ -1,14 +1,20 @@
 package com.alexlabbane.underwaterbedwars;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -38,6 +44,9 @@ public class BedwarsGame {
 	private int genLevel;
 	private int ticksToNextLevel; // How many ticks are left until the next gen upgrade
 	
+	private World gameWorld;
+	private String gameWorldName;
+	
 	/************* Static members *************/
 	
 	private static ArrayList<BedwarsGame> activeGames = new ArrayList<BedwarsGame>(); // Allows all games to be accessed in static context from anywhere
@@ -49,6 +58,8 @@ public class BedwarsGame {
 	 * @param p 	reference to the plugin
 	 */
 	public BedwarsGame(Plugin p) {
+		UnderwaterBedwars.game = this;
+		
 		this.plugin = p;
 		this.mapEdit = false;
 		activeGames.add(this);
@@ -57,12 +68,15 @@ public class BedwarsGame {
 		nextID++;
 		
 		this.genTimerTask = null;
+		this.gameWorld = null;
+		this.gameWorldName = this.plugin.getConfig().getString("game.world-name");
 		this.resetGame();
 	}
 	
 	/************* Getters/setters *************/
 	
 	public Plugin getPlugin() { return this.plugin; }
+	public World getWorld() { return this.gameWorld; }
 	public ArrayList<BedwarsTeam> getTeams() { return this.teams; }
 	public boolean mapIsEditable() { return this.mapEdit; }
 	public void toggleMapEdit() { this.mapEdit = !this.mapEdit; }
@@ -83,10 +97,57 @@ public class BedwarsGame {
 	public static Material[] getCurrentcies() { return currencies; }
 	
 	/**
-	 * Reset all elements of the game. Does not start the next game (i.e. all gens/upgrades are paused)
+	 * Reset all elements of the game and re-load the world. Does not start the next game (i.e. all gens/upgrades are paused)
 	 * To start the game, call startGame()
 	 */
 	public void resetGame() {
+		this.gameWorld = Bukkit.getServer().getWorld("active-map");
+		if(this.gameWorld != null) {
+			for(Player player : this.gameWorld.getPlayers()) {
+				player.kickPlayer("This game is no longer available! TODO: Implement lobby");
+			}
+			
+			if(Bukkit.getServer().unloadWorld(this.gameWorld, true)) {
+				this.gameWorld = null;
+			} else {
+				Bukkit.broadcastMessage(ChatColor.RED + "Failed to unload world.");
+			}
+		}
+		
+		if(Bukkit.getServer().getWorld(this.gameWorldName) != null) {
+			Bukkit.getServer().unloadWorld(gameWorldName, true);
+		}
+		
+		// Re-load the game world
+		if(this.gameWorld != null) {
+			Bukkit.getServer().unloadWorld(this.gameWorld, true);
+		}
+		
+		File world = new File(this.gameWorldName);
+		File worldCopy = new File("active-map");
+		
+		// Delete all existing files in worldCopy
+		for(File file : worldCopy.listFiles()) {
+			if(file.isDirectory()) {
+				Util.deleteFolder(file);
+			} else {
+				file.delete();
+			}
+		}
+		
+		try {
+			FileUtils.copyDirectory(world, worldCopy);
+			Bukkit.broadcastMessage("Copied " + world.getAbsolutePath() + " to " + worldCopy.getAbsolutePath());
+		} catch (IOException e) {
+			Bukkit.broadcastMessage(ChatColor.RED + "ERROR: Could not load the game world. Maybe another process is using it?");
+			Bukkit.broadcastMessage(e.getMessage());
+			e.printStackTrace();
+			return;
+		}
+		
+		this.gameWorld = Bukkit.createWorld(new WorldCreator(worldCopy.getName()));
+		Bukkit.broadcastMessage("Loaded " + this.gameWorldName);
+		
 		// Kill all non-player entities prior to start of game
 		this.killEntities();
 		
@@ -338,7 +399,7 @@ public class BedwarsGame {
 	 * Kill all entities in the world the game is hosted in
 	 */
 	public void killEntities() {
-		World world = Bukkit.getServer().getWorlds().get(0);
+		World world = this.getWorld();
 		for(Entity e : world.getEntities()) {
 			if(e instanceof Player) {
 				continue;

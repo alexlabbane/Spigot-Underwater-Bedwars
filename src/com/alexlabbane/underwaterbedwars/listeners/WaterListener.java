@@ -31,7 +31,7 @@ public class WaterListener implements Listener {
 	 */
 	public static void toggle() {
 		WaterListener.enabled = !WaterListener.enabled;
-		Bukkit.broadcastMessage("Water flow enabled? " + WaterListener.enabled);
+		Bukkit.broadcastMessage("Water flow enabled? " + !WaterListener.enabled);
 	}
 	
 	/**

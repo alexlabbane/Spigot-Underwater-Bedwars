@@ -94,7 +94,7 @@ public class GameGen {
 		FileConfiguration config = Util.plugin.getConfig();
 		
 		Location genLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0),
+				UnderwaterBedwars.game.getWorld(),
 				config.getDouble("game.gens." + genName + ".x"),
 				config.getDouble("game.gens." + genName + ".y"),
 				config.getDouble("game.gens." + genName + ".z"));

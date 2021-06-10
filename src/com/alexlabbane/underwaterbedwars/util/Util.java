@@ -1,5 +1,6 @@
 package com.alexlabbane.underwaterbedwars.util;
 
+import java.io.File;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -270,5 +271,22 @@ public class Util {
                 fw.detonate();		
         	}
         }.runTaskLater(Util.plugin, duration);
+	}
+	
+	/**
+	 * Delete a directory
+	 */
+	public static void deleteFolder(File folder) {
+	    File[] files = folder.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	            if(f.isDirectory()) {
+	                deleteFolder(f);
+	            } else {
+	                f.delete();
+	            }
+	        }
+	    }
+	    folder.delete();
 	}
 }

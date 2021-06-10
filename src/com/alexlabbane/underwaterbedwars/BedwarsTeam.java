@@ -242,7 +242,7 @@ public class BedwarsTeam implements Listener {
 		
 		// Set spawn location
 		this.spawnLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0),
+				this.game.getWorld(),
 				config.getDouble(this.configPath + ".spawn-location.x"),
 				config.getDouble(this.configPath + ".spawn-location.y"),
 				config.getDouble(this.configPath + ".spawn-location.z"));
@@ -256,7 +256,7 @@ public class BedwarsTeam implements Listener {
 		this.itemShop = new ItemShop(color, game);
 		
 		Location itemShopLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0),
+				this.game.getWorld(),
 				this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.x"),
 				this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.y"),
 				this.plugin.getConfig().getDouble(this.configPath + ".item-shop-location.z"));
@@ -277,7 +277,7 @@ public class BedwarsTeam implements Listener {
 		this.trapShop = new TrapShop(color, game);
 		
 		Location teamShopLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0),
+				this.game.getWorld(),
 				this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.x"),
 				this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.y"),
 				this.plugin.getConfig().getDouble(this.configPath + ".team-shop-location.z"));
@@ -303,7 +303,7 @@ public class BedwarsTeam implements Listener {
 		
 		// Initialize chest + ender chest
 		Location chestLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0),
+				this.game.getWorld(),
 				this.plugin.getConfig().getDouble(this.configPath + ".chest-location.x"),
 				this.plugin.getConfig().getDouble(this.configPath + ".chest-location.y"),
 				this.plugin.getConfig().getDouble(this.configPath + ".chest-location.z"));
@@ -320,7 +320,7 @@ public class BedwarsTeam implements Listener {
 		this.chest = chestLocation.getBlock();
 		
 		Location enderChestLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0),
+				this.game.getWorld(),
 				this.plugin.getConfig().getDouble(this.configPath + ".ender-chest-location.x"),
 				this.plugin.getConfig().getDouble(this.configPath + ".ender-chest-location.y"),
 				this.plugin.getConfig().getDouble(this.configPath + ".ender-chest-location.z"));
@@ -876,7 +876,7 @@ public class BedwarsTeam implements Listener {
 		}
 		
 		// To split, source must be from team gen
-		if(!Util.getNBTTagString(pickedUpItem, "source").equals("team_gen")) {
+		if(Util.getNBTTagString(pickedUpItem, "source") != null && !Util.getNBTTagString(pickedUpItem, "source").equals("team_gen")) {
 			return;
 		}
 		

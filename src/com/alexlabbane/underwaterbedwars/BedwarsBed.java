@@ -70,7 +70,7 @@ public class BedwarsBed implements Listener {
 		
 		this.trappedPlayers = new ArrayDeque<BedwarsPlayer>();
 		this.headLocation = new Location(
-				Bukkit.getServer().getWorlds().get(0), // Overworld
+				UnderwaterBedwars.game.getWorld(),
 				config.getDouble(configPath + ".bed-location.x"),
 				config.getDouble(configPath + ".bed-location.y"),
 				config.getDouble(configPath + ".bed-location.z"));
@@ -236,6 +236,11 @@ public class BedwarsBed implements Listener {
 	 */
 	@EventHandler
 	public void onPlayerEnterTrapRange(PlayerMoveEvent e) {
+		// Make sure player is in same world as bed
+		if(e.getPlayer().getWorld() != this.headLocation.getWorld()) {
+			return;
+		}
+		
 		// Check if bed is broken; make sure player within specified block radius
 		if(this.broken || e.getPlayer().getLocation().distanceSquared(this.headLocation) > BedwarsBed.TRAP_RADIUS_SQUARED)
 			return;
