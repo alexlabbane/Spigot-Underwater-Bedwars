@@ -871,7 +871,7 @@ public class BedwarsTeam implements Listener {
 		Player player = (Player)entity;
 		
 		// Only handle players on this team
-		if(this.game.getBedwarsPlayer(player).getTeam() != this) {
+		if(this.game.getBedwarsPlayer(player) == null || this.game.getBedwarsPlayer(player).getTeam() != this) {
 			return;
 		}
 		

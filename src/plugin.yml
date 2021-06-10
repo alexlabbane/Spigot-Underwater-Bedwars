@@ -6,6 +6,8 @@ api-version: 1.16
 author: Alex Labbane
 
 commands:
+  tpworld:
+    description: Teleport to a world with a designated name
   toggle:
     description: Toggle effects
   setitemshoplocation:

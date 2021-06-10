@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -85,6 +86,19 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     		} else if(args[0].equals("map_edit")) {
     			game.toggleMapEdit();
     			Bukkit.broadcastMessage("Map editable: " + game.mapIsEditable());
+    		} 
+    	} else if(label.equals("tpworld") && sender instanceof Player) {
+    		Player p = (Player)sender;
+    		if(args.length == 1) {
+    			p.teleport(new Location(
+    					Bukkit.getServer().getWorld(args[0]),
+    					p.getLocation().getX(),
+    					p.getLocation().getY(),
+    					p.getLocation().getZ()
+    				)
+    			);
+    		} else {
+    			p.sendMessage("Usage: /tpworld <world name>");
     		}
     	} else if(label.equals("setitemshoplocation") && sender instanceof Player) {
     		//getServer().broadcastMessage("Color is " + args[0]);
@@ -122,7 +136,7 @@ public class UnderwaterBedwars extends JavaPlugin implements Listener {
     		if(args[0].equals("add")) {
     			if(args.length <= 2)
     				return false;
-    			
+    			getServer().getLogger().log(Level.INFO, "Adding player " + args[1]);
     			// Add a player to a team
     			Player p = sender.getServer().getPlayer(args[1]);
     			getServer().getLogger().log(Level.WARNING, p.getName());

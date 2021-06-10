@@ -119,6 +119,7 @@ public class BedwarsGame {
 	public void resetGame() {
 		// Teleport all players to lobby
 		for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+			player.getInventory().clear();
 			player.teleport(this.lobbyLocation);
 		}
 		
