@@ -1,4 +1,10 @@
 game:
+  lobby:
+    world-name: underwater_bedwars_lobby
+    spawn-location:
+      x: 0
+      y: 100
+      z: 0
   world-name: underwater_bedwars_map
   game-level:
     level-1:

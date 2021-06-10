@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -47,6 +48,10 @@ public class BedwarsGame {
 	private World gameWorld;
 	private String gameWorldName;
 	
+	private World lobbyWorld;
+	private String lobbyWorldName;
+	private Location lobbyLocation;
+	
 	/************* Static members *************/
 	
 	private static ArrayList<BedwarsGame> activeGames = new ArrayList<BedwarsGame>(); // Allows all games to be accessed in static context from anywhere
@@ -67,9 +72,20 @@ public class BedwarsGame {
 		this.gameID = nextID;
 		nextID++;
 		
+		FileConfiguration config = this.plugin.getConfig();
+		
+		this.lobbyWorldName = config.getString("game.lobby.world-name");
+		this.lobbyWorld = Bukkit.createWorld(new WorldCreator(this.lobbyWorldName));
+		this.lobbyLocation = new Location(
+				this.lobbyWorld,
+				config.getDouble("game.lobby.spawn-location.x"),
+				config.getDouble("game.lobby.spawn-location.y"),
+				config.getDouble("game.lobby.spawn-location.z")
+		);
+		
 		this.genTimerTask = null;
 		this.gameWorld = null;
-		this.gameWorldName = this.plugin.getConfig().getString("game.world-name");
+		this.gameWorldName = config.getString("game.world-name");
 		this.resetGame();
 	}
 	
@@ -101,12 +117,14 @@ public class BedwarsGame {
 	 * To start the game, call startGame()
 	 */
 	public void resetGame() {
+		// Teleport all players to lobby
+		for(Player player : Bukkit.getServer().getOnlinePlayers()) {
+			player.teleport(this.lobbyLocation);
+		}
+		
+		// Unload any previous bedwars game map
 		this.gameWorld = Bukkit.getServer().getWorld("active-map");
 		if(this.gameWorld != null) {
-			for(Player player : this.gameWorld.getPlayers()) {
-				player.kickPlayer("This game is no longer available! TODO: Implement lobby");
-			}
-			
 			if(Bukkit.getServer().unloadWorld(this.gameWorld, true)) {
 				this.gameWorld = null;
 			} else {
@@ -114,15 +132,7 @@ public class BedwarsGame {
 			}
 		}
 		
-		if(Bukkit.getServer().getWorld(this.gameWorldName) != null) {
-			Bukkit.getServer().unloadWorld(gameWorldName, true);
-		}
-		
 		// Re-load the game world
-		if(this.gameWorld != null) {
-			Bukkit.getServer().unloadWorld(this.gameWorld, true);
-		}
-		
 		File world = new File(this.gameWorldName);
 		File worldCopy = new File("active-map");
 		
@@ -137,7 +147,6 @@ public class BedwarsGame {
 		
 		try {
 			FileUtils.copyDirectory(world, worldCopy);
-			Bukkit.broadcastMessage("Copied " + world.getAbsolutePath() + " to " + worldCopy.getAbsolutePath());
 		} catch (IOException e) {
 			Bukkit.broadcastMessage(ChatColor.RED + "ERROR: Could not load the game world. Maybe another process is using it?");
 			Bukkit.broadcastMessage(e.getMessage());
@@ -146,7 +155,7 @@ public class BedwarsGame {
 		}
 		
 		this.gameWorld = Bukkit.createWorld(new WorldCreator(worldCopy.getName()));
-		Bukkit.broadcastMessage("Loaded " + this.gameWorldName);
+		Bukkit.broadcastMessage(ChatColor.GREEN + "Game ready to start.");
 		
 		// Kill all non-player entities prior to start of game
 		this.killEntities();
