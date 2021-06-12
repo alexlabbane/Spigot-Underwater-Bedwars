@@ -319,6 +319,7 @@ public class BedwarsGame {
 					if(genLevel == config.getInt("game.draw-level")) {
 						for(Player player : getPlayers()) {
 							player.sendTitle(ChatColor.YELLOW + "DRAW!", "", 0, Util.TICKS_PER_SECOND * 4, 0);
+							player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 						}
 						
 						new BukkitRunnable() {
