@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.attribute.Attribute;
@@ -231,6 +232,7 @@ public class BedwarsGame {
 						// Teleport all players to start location
 						// Remove effects, put them in survival
 						for(Player player : team.getPlayers()) {
+							player.setInvulnerable(false);
 							player.teleport(team.getSpawnLocation());
 							player.setGameMode(GameMode.SURVIVAL);
 							player.sendTitle(ChatColor.GREEN + "Start!", "", 0, 20, 0);
@@ -298,6 +300,20 @@ public class BedwarsGame {
 				
 				if(ticksToNextLevel <= 0) {
 					upgradeGens();
+					
+					if(genLevel == config.getInt("game.beds-gone-level")) {
+						for(BedwarsTeam team : getTeams()) {
+							team.getBed().breakBed();
+							
+							for(BedwarsPlayer bwPlayer : team.getBedwarsPlayers()) {
+								Player player = bwPlayer.getPlayer();
+								player.sendTitle(ChatColor.RED + "All beds are gone!", "", 0, Util.TICKS_PER_SECOND * 3, 0);
+								player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+							}
+						}
+						
+						updateScoreboards();
+					}
 					
 					// Get the time to the next upgrade (or cancel the task if all upgrades reached)
 					ticksToNextLevel = config.getInt("game.game-level.level-" + (genLevel + 1) + ".delay-ticks");

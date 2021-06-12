@@ -28,6 +28,7 @@ game:
     level-7:
       delay-ticks: 12000
       tier: Draw
+  beds-gone-level: 1
   gens:
     gen_1:
       x: 1.5

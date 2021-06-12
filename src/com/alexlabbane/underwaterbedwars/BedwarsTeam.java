@@ -66,6 +66,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_16_R2.EntityThrownTrident;
+import net.minecraft.server.v1_16_R2.GameProfileBanEntry;
 
 /**
  * Represents a team in a BedwarsGame. Most listeners to player actions are also implemented here
@@ -696,8 +697,9 @@ public class BedwarsTeam implements Listener {
 					+ ChatColor.GREEN + " team won the game!");
 			
 			for(Player player : this.getPlayers()) {
-				player.sendTitle(ChatColor.YELLOW + ChatColor.BOLD.toString() + "VICTORY!", "", 0, 80, 0);
+				player.sendTitle(ChatColor.YELLOW + ChatColor.BOLD.toString() + "VICTORY!", "", 0, Util.TICKS_PER_SECOND * 4, 0);
 
+				player.setInvulnerable(true);
 				new BukkitRunnable() {
 					int count = 0;
 					
@@ -708,10 +710,18 @@ public class BedwarsTeam implements Listener {
 						
 						if(count >= 5) {
 							this.cancel();
+							player.setInvulnerable(false);
 						}
 					}
 				}.runTaskTimer(this.plugin, 10, 10);
 			}
+			
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					game.resetGame();
+				}
+			}.runTaskLater(this.plugin, Util.TICKS_PER_SECOND * 10);
 		}
 		
 	}

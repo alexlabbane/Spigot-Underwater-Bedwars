@@ -141,6 +141,16 @@ public class BedwarsBed implements Listener {
 	}
 	
 	/**
+	 * Artificially break the bed
+	 */
+	public void breakBed() {
+		this.headLocation.getBlock().setType(Material.AIR);
+		this.footLocation.getBlock().setType(Material.AIR);
+		
+		this.broken = true;
+	}
+	
+	/**
 	 * Whenever a bed is broken, we check to see if it is the bed
 	 * and update it to broken if so. Also updates all player
 	 * scoreboards and sends notification message to players
