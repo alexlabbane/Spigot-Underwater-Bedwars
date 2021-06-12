@@ -22,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -122,6 +123,7 @@ public class BedwarsGame {
 		for(Player player : Bukkit.getServer().getOnlinePlayers()) {
 			player.getInventory().clear();
 			player.teleport(this.lobbyLocation);
+			player.setInvulnerable(true);
 		}
 		
 		// Unload any previous bedwars game map
@@ -241,6 +243,8 @@ public class BedwarsGame {
 							for(PotionEffect pe : player.getActivePotionEffects()) {
 								player.removePotionEffect(pe.getType());
 							}
+							
+							player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1));
 						}
 					}
 					
@@ -320,12 +324,17 @@ public class BedwarsGame {
 						for(Player player : getPlayers()) {
 							player.sendTitle(ChatColor.YELLOW + "DRAW!", "", 0, Util.TICKS_PER_SECOND * 4, 0);
 							player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+							player.setInvulnerable(true);
 						}
 						
 						new BukkitRunnable() {
 							@Override
 							public void run() {
 								resetGame();
+								
+								for(Player player : getPlayers()) {
+									player.setInvulnerable(true);
+								}
 							}
 						}.runTaskLater(plugin, Util.TICKS_PER_SECOND * 10);
 					}

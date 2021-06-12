@@ -668,6 +668,7 @@ public class BedwarsTeam implements Listener {
 				public void run() {
 					p.teleport(spawnLocation);
 					p.setGameMode(GameMode.SURVIVAL);
+					p.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 1));
 					bwPlayer.setPlayerArmor();
 					bwPlayer.setPlayerStarterMaterials();
 					bwPlayer.setPlayerHaste();
