@@ -301,6 +301,7 @@ public class BedwarsGame {
 				if(ticksToNextLevel <= 0) {
 					upgradeGens();
 					
+					// Destroy all beds in the game
 					if(genLevel == config.getInt("game.beds-gone-level")) {
 						for(BedwarsTeam team : getTeams()) {
 							team.getBed().breakBed();
@@ -313,6 +314,19 @@ public class BedwarsGame {
 						}
 						
 						updateScoreboards();
+					}
+					
+					if(genLevel == config.getInt("game.draw-level")) {
+						for(Player player : getPlayers()) {
+							player.sendTitle(ChatColor.YELLOW + "DRAW!", "", 0, Util.TICKS_PER_SECOND * 4, 0);
+						}
+						
+						new BukkitRunnable() {
+							@Override
+							public void run() {
+								resetGame();
+							}
+						}.runTaskLater(plugin, Util.TICKS_PER_SECOND * 10);
 					}
 					
 					// Get the time to the next upgrade (or cancel the task if all upgrades reached)
